@@ -20,6 +20,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openehr.rm.support.identification.UIDBasedID;
 import org.openehr.rm.datatypes.text.DvText;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -368,19 +369,25 @@ public abstract class Locatable extends Pathable implements Settable, Cloneable 
      */
     private Object getAttributeValue(Object obj, String attribute) {
     	Class rmClass = obj.getClass();
-    	Object value = null;
-    	Method getter = null;
+    	Object value;
+    	Method getter;
     	String getterName = "get" + toFirstUpperCaseCamelCase(attribute);
-    	
-    	try {
-			getter = rmClass.getMethod(getterName, null);
-			value = getter.invoke(obj, null);
 
-    	} catch(Exception e) {
-			// TODO log as kernel warning
-			// e.printStackTrace();
-		}
-		return value;
+        try {
+            getter = rmClass.getMethod(getterName, null);
+            value = getter.invoke(obj, null);
+        } catch (NoSuchMethodException e) {
+            //throw new IllegalArgumentException("problem invoking getter method: " + getterName + " for rmClass=" + 
+            //        rmClass + ": " + e.getMessage(), e);
+            value = null;
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("problem invoking getter method: " + getterName + " for rmClass=" + 
+                    rmClass + ": " + e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("problem invoking getter method: " + getterName + " for rmClass=" + 
+                    rmClass + ": " + e.getMessage(), e);
+        }
+        return value;
     }
     
     /*
@@ -390,17 +397,19 @@ public abstract class Locatable extends Pathable implements Settable, Cloneable 
     	Class rmClass = obj.getClass();
     	String setterName = "set" + toFirstUpperCaseCamelCase(attribute);
 
-    	try {
-			Method setter = getMethodByName(rmClass, setterName);
-			if(setter == null) {
-				throw new IllegalArgumentException("unkown setter method: " + setterName + " for rmClass=" + rmClass);
-			}
-			setter.invoke(obj, value);			
-		
-    	} catch(Exception e) {		
-    		// TODO log as kernel warning
-			e.printStackTrace();			
-		}
+        Method setter = getMethodByName(rmClass, setterName);
+        if(setter == null) {
+            throw new IllegalArgumentException("unknown setter method: " + setterName + " for rmClass=" + rmClass);
+        }
+        try {
+            setter.invoke(obj, value);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("problem invoking setter method: " + setterName + " for rmClass=" + 
+                    rmClass + ": " + e.getMessage(), e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("problem invoking setter method: " + setterName + " for rmClass=" + 
+                    rmClass + ": " + e.getMessage(), e);
+        }
     }
     
     private Method getMethodByName(Class klass, String method) {
