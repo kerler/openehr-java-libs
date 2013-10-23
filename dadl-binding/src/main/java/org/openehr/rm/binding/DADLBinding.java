@@ -15,6 +15,7 @@ package org.openehr.rm.binding;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -186,12 +187,13 @@ public class DADLBinding {
 		}
 	}
 	
-	public List<String> toDADL(Object obj) throws Exception {
+	public List<String> toDADL(Object obj) throws InvocationTargetException, IllegalAccessException {
 		List<String> lines = new ArrayList<String>();
 		return toDADL(obj, 1, lines);
 	}
 	
-	public List<String> toDADL(Object obj, int indent, List<String> lines) throws Exception {		
+	public List<String> toDADL(Object obj, int indent, List<String> lines)
+			throws InvocationTargetException, IllegalAccessException {		
 		
 		
 		log.debug("toDADL on obj.getClass: " + obj.getClass().getCanonicalName()
