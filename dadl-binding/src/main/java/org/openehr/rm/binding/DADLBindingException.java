@@ -26,6 +26,14 @@ public class DADLBindingException extends Exception {
 	
 	public DADLBindingException() {		
 	}
+
+	public DADLBindingException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public DADLBindingException(Throwable cause) {
+		super(cause);
+	}
 }
 /*
  * ***** BEGIN LICENSE BLOCK ***** Version: MPL 1.1/GPL 2.0/LGPL 2.1

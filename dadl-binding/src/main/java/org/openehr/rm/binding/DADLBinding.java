@@ -58,7 +58,11 @@ import org.openehr.terminology.SimpleTerminologyService;
  */
 public class DADLBinding {
 
-	public DADLBinding() {
+	public DADLBinding(Map<SystemValue, Object> values) {
+		init(values);
+	}
+
+	public DADLBinding() throws DADLBindingException {
 		try {
 			TerminologyService termServ;
 			MeasurementService measureServ;
@@ -74,12 +78,14 @@ public class DADLBinding {
 			values.put(SystemValue.ENCODING, charset);
 			values.put(SystemValue.TERMINOLOGY_SERVICE, termServ);
 			values.put(SystemValue.MEASUREMENT_SERVICE, measureServ);
-			builder = new RMObjectBuilder(values);
-
+			init(values);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("failed to start DADLBinding..");
+			throw new DADLBindingException("failed to start DADLBinding:" + e.getMessage(), e);
 		}
+	}
+
+	private void init(Map<SystemValue, Object> values) {
+		builder = new RMObjectBuilder(values);
 	}
 
 	public Object bind(ContentObject co) throws DADLBindingException,
