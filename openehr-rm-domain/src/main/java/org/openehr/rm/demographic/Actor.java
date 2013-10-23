@@ -95,9 +95,9 @@ public abstract class Actor extends Party {
         if (!hasLegalIdentity) {
             throw new IllegalArgumentException("no legal identity");
         }
-        if (roles != null && roles.isEmpty()) {
-            throw new IllegalArgumentException("empty roles");
-        }
+        // if (roles != null && roles.isEmpty()) {
+        //     throw new IllegalArgumentException("empty roles");
+        // }
         if (languages != null && languages.isEmpty()) {
             throw new IllegalArgumentException("empty languages");
         }

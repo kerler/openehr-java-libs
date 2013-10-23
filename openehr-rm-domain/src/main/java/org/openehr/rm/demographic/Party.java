@@ -74,19 +74,18 @@ public abstract class Party extends Locatable {
         if (uid == null) {
             throw new IllegalArgumentException("null uid");
         }
-        if (identities == null || identities.isEmpty()) {
-            throw new IllegalArgumentException("null or empty identities");
-        }
-        if (contacts != null && contacts.isEmpty()) {
-            throw new IllegalArgumentException("empty contacts");
-        }
-        if (relationships != null) {
-            if (relationships.isEmpty()) {
-                throw new IllegalArgumentException("empty relationships");
-            }
+        // if (identities == null || identities.isEmpty()) {
+        //     throw new IllegalArgumentException("null or empty identities");
+        // }
+        // if (contacts != null && contacts.isEmpty()) {
+        //     throw new IllegalArgumentException("empty contacts");
+        // }
+        if (relationships != null && !relationships.isEmpty()) {
+            // throw new IllegalArgumentException("empty relationships");
             boolean hasThis = false;
             for (PartyRelationship relation : relationships) {
-                if (relation.getSource().getId().equals(getUid())) {
+                if (relation.getSource().getId().equals(getUid()))
+                {
                     hasThis = true;
                     break;
                 }

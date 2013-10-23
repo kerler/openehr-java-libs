@@ -106,9 +106,9 @@ public class PersonTest extends DemographicTestBase {
 				relationships, reverseRelationships, details, null, languages);
 
 		// null identities
-		assertExceptionThrow(uid, meaning, name, archetypeDetails, null,
-				contacts, relationships, reverseRelationships, details, null,
-				languages);
+		// assertExceptionThrow(uid, meaning, name, archetypeDetails, null,
+		// 		contacts, relationships, reverseRelationships, details, null,
+		// 		languages);
 	}
 
 	private void assertExceptionThrow(UIDBasedID uid, String meaning,

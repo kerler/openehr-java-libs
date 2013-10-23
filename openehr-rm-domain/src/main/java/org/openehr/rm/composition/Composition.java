@@ -79,11 +79,18 @@ public final class Composition extends Locatable {
             throw new IllegalArgumentException("not archetype root");
         }
 
-        if (content != null && content.isEmpty()) {
-            throw new IllegalArgumentException("empty content");
-        }
+		// forcing non-empty content makes it hard to create a Composition with entries inside it without using
+		// reflection. I.e. this check is disabled to allow for this pattern:
+		//    List<ContentItem> items = new ArrayList<>();
+		//    Composition parent = makeComposition(...., items, ....);
+		//    AdminEntry entry = makeEntry(...., parent, .....);
+		//    items.add(entry);
+		// 
+		//if (content != null && content.isEmpty()) {
+		//    throw new IllegalArgumentException("empty content");
+		//}
 
-        if (isPersistent(category) && context != null) {
+		if (isPersistent(category) && context != null) {
             throw new IllegalArgumentException("invalid persistent category");
         }
         if (composer == null) {

@@ -90,9 +90,9 @@ public class Role extends Party {
                 identities, contacts, relationships, reverseRelationships,
                 details);
 
-        if (capabilities != null && capabilities.size() == 0) {
-            throw new IllegalArgumentException("Empty capabilities");
-        }
+        // if (capabilities != null && capabilities.size() == 0) {
+        //     throw new IllegalArgumentException("Empty capabilities");
+        // }
         if (performer == null) {
             throw new IllegalArgumentException("Null performer");
         }

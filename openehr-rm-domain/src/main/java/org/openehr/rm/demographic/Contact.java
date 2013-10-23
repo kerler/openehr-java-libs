@@ -70,9 +70,9 @@ public class Contact extends Locatable {
                            @Attribute(name = "timeValidity") DvInterval<DvDate> timeValidity,
                            @Attribute(name = "addresses", required = true) List<Address> addresses) {
         super(uid, archetypeNodeId, name, archetypeDetails, feederAudit, links, parent);
-        if (addresses == null || addresses.size() == 0) {
-            throw new IllegalArgumentException("null or empty addresses");
-        }
+        // if (addresses == null || addresses.size() == 0) {
+        //     throw new IllegalArgumentException("null or empty addresses");
+        // }
         this.timeValidity = timeValidity;
         this.addresses = addresses;
     }
