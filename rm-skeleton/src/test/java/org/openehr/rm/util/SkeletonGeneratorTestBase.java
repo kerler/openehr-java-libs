@@ -33,7 +33,7 @@ public class SkeletonGeneratorTestBase extends TestCase {
 	public SkeletonGeneratorTestBase() throws Exception {
 		dadlBinding = new DADLBinding();	
 		xmlBinding = new XMLBinding();
-		generator = SkeletonGenerator.getInstance();
+		generator = new SkeletonGenerator();
 		oetParser = new OETParser();
 		flattener = new Flattener();
 		adlSerializer = new ADLSerializer();
