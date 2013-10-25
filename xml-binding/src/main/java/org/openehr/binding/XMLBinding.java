@@ -112,6 +112,9 @@ public class XMLBinding {
 				} catch (ClassNotFoundException e) {
 					factoryClass = Class.forName(XML_BINDING_PACKAGE +
 				 					className.toUpperCase() + "Document$Factory");
+                } catch (NoClassDefFoundError e) {
+                    factoryClass = Class.forName(XML_BINDING_PACKAGE +
+                                    className.toUpperCase() + "Document$Factory");
 				}
 
 				Method factoryMethod = factoryClass.getMethod(NEW_INSTANCE, XmlOptions.class);
