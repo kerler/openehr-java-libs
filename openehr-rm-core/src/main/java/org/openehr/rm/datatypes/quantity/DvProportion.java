@@ -66,35 +66,43 @@ public class DvProportion extends DvAmount<DvProportion> {
         if(type == null) {
         	throw new IllegalArgumentException("null type");
         } else if(type == ProportionKind.UNITARY) {
-        	if(denominator != 1) {
+        	if(Math.floor(denominator) != 1) {
         		throw new IllegalArgumentException(
         				"denominator for unitary proportion must be 1");
         	}
         } else if(type == ProportionKind.PERCENT) {
-        	if(denominator != 100) {
+        	if(Math.floor(denominator) != 100) {
         		throw new IllegalArgumentException(
         				"denominator for unitary proportion must be 100");
         	}
         } else if(type == ProportionKind.FRACTION ||
         		type == ProportionKind.INTEGER_FRACTION) {
         	
-        	if(! bothIntegral(numerator, denominator)) {
-        		throw new IllegalArgumentException(
-        			"both numberator and denominator must be integral for " +
-        			"fraction or integer fraction proportion");        		
-        	}
+        	// if(! bothIntegral(numerator, denominator)) {
+        	// 	throw new IllegalArgumentException(
+        	//		"both numberator and denominator must be integral for " +
+        	//		"fraction or integer fraction proportion");        		
+        	// }
         }
         
-        if(bothIntegral(numerator, denominator) 
-        		&& (precision != null && precision != 0)) {
-        	throw new IllegalArgumentException("precision must be 0 if both " +
-        			"numerator and denominator are integral");
-        }
-        if( !bothIntegral(numerator, denominator) 
-        		&& (precision != null && precision == 0)) {
-        	throw new IllegalArgumentException("zero precision for " +
-        			"non-integral numerator or denominator");
-        }
+        // These bothIntegral() checks make no sense, consider
+        //        numerator   = 1.000000000000000000
+        //        floor(numerator) == 1
+        //        denominator = 1.000000000000000000
+        //        floor(denominator) == 1
+        //        precision   = 8
+        // the problem is with the broken/simplistic assumptions about floating point number precision
+        // 
+        // if(bothIntegral(numerator, denominator) 
+        // 		&& (precision != null && precision != 0)) {
+        // 	throw new IllegalArgumentException("precision must be 0 if both " +
+        // 			"numerator and denominator are integral");
+        // }
+        // if( !bothIntegral(numerator, denominator) 
+        // 		&& (precision != null && precision == 0)) {
+        // 	throw new IllegalArgumentException("zero precision for " +
+        // 			"non-integral numerator or denominator");
+        // }
         
         this.numerator = numerator;
         this.denominator = denominator;
