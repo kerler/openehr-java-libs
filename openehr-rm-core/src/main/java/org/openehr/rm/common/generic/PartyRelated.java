@@ -47,13 +47,13 @@ public final class PartyRelated extends PartyIdentified {
     		@Attribute(name = "name")String name,
     		@Attribute(name = "identifiers")List<DvIdentifier> identifiers, 
     		@Attribute(name = "relationship", required = true)DvCodedText relationship,
-    		@Attribute(name = "terminologyService")TerminologyService terminologyService) {
+    		@Attribute(name = "terminologyService", system = true)TerminologyService terminologyService) {
     		super(externalRef, name, identifiers);
         if (relationship == null) {
             throw new IllegalArgumentException("null relationship");
         }
         if (!terminologyService.terminology(TerminologyService.OPENEHR)
-                .codesForGroupName("related party relationship", "en")
+                .codesForGroupName("subject relationship", "en")
                 .contains(relationship.getDefiningCode())) {
             throw new IllegalArgumentException(
                     "unkown relationship: " + relationship);
