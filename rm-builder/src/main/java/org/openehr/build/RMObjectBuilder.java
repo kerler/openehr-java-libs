@@ -34,6 +34,7 @@ import org.openehr.rm.datatypes.quantity.datetime.*;
 import org.openehr.rm.datatypes.text.*;
 import org.openehr.rm.datatypes.uri.*;
 import org.openehr.rm.demographic.*;
+import org.openehr.rm.ehr.EHRStatus;
 import org.openehr.rm.support.identification.*;
 
 import java.lang.annotation.Annotation;
@@ -156,6 +157,7 @@ public class RMObjectBuilder {
 				Instruction.class, InstructionDetails.class, Observation.class, AdminEntry.class,
 				Section.class, Composition.class,
 				EventContext.class, ISMTransition.class,
+				EHRStatus.class,
 
 				// demographic classes
 				Address.class, PartyIdentity.class, Agent.class, Group.class,

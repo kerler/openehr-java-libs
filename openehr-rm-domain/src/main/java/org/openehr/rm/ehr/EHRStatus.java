@@ -47,7 +47,7 @@ public class EHRStatus extends Locatable {
             @Attribute(name = "feederAudit") FeederAudit feederAudit,
             @Attribute(name = "links") Set<Link> links,
             @Attribute(name = "parent") Pathable parent,
-            @Attribute(name = "subject", system = true) PartySelf subject,
+            @Attribute(name = "subject") PartySelf subject,
             @Attribute(name = "isQueryable", required = true) boolean isQueryable,
             @Attribute(name = "isModifiable", required = true) boolean isModifiable,
             @Attribute(name = "otherDetails") ItemStructure otherDetails ) {
