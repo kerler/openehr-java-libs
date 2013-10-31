@@ -50,10 +50,10 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
 
         checkSpecialisedObjectConstraints(archetype, parentArchetype, childSpecialisationDepth, errors);
         checkSpecialisationHierarchyOfAllAtAndAcCodesInTheDefinition(archetype, childSpecialisationDepth, errors);
-        log.debug("-- Error size:" +errors.size());
-        for (ValidationError error : errors) {
-            log.debug("Error: " + error.getType() + " "+ error.getText());
-        }
+//        log.debug("-- Error size:" +errors.size());
+//        for (ValidationError error : errors) {
+//            log.debug("Error: " + error.getType() + " "+ error.getText());
+//        }
         return errors;
 
     }
@@ -93,8 +93,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
             CObject parentNode = (CObject)parentArchetype.node(parentPath);
 
             if (parentNode == null) {
-                log.debug("No parent node found for path: "+ parentPath + " (child path: "+ ccobj.path());
-
                 int goingUpTheSpecTree = childSpecialisationDepth -2;
                 boolean foundParentFurtherUp = false;
 
@@ -141,8 +139,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
 
                 if (ccobj.getNodeId() != null) {
                     String parentNodeId = getExpectedPathInParentArchetype(ccobj.getNodeId(), childSpecialisationDepth-1);
-                    log.debug("Checking that the corresponding term is in the parent archetype: "+parentNodeId + " for "+ccobj.getNodeId());
-
                     if (!checkDynamicArchetypeType(parentNode, ccobj, errors)) {
                         return; // if there is an error in the dynamic types already, this is so wrong, that we skip any subsequent validation.
                     }
@@ -157,7 +153,7 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
 
             }
         } else {
-            log.debug("No appropriate path exists in parent for child path: "+ccobj.path()); // this would be ok - newly introduced node without a parent, no further validation is required.
+            // No appropriate path exists in parent for child path
         }
 
 
@@ -207,15 +203,11 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
                 parentNodeInParentArchetype = (CObject)parentArchetype.node(parentNodePathInParentArchetype);
             }
 
-            if (parentNodeInParentArchetype == null) {
-                log.debug("PARENT NODE IN PARENT ARCHETYPE IS NULL");
-            }
-
             if (parentNodeInParentArchetype instanceof CComplexObject) {			   
                 attrInParentArchetype = ((CComplexObject) parentNodeInParentArchetype).getAttribute(cattr.getRmAttributeName());
             } else {
                 // Can we really simply ignore this case where the parent node in the parent archetype is not a CComplexObject or do we need to introduce other handling here for _DV_QUANTITY and the like?
-                log.debug("PARENT NODE IN PARENT ARCHETYPE IS NOT A CCOMPLEXOBJECT, BUT "+ parentNodeInParentArchetype.getClass().getName());
+                // PARENT NODE IN PARENT ARCHETYPE IS NOT A CCOMPLEXOBJECT
             }
         }
 
@@ -229,9 +221,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
         // now get all the attribute's children and validate them.
         if (cattr.getChildren() != null) {
             for (CObject cobj : cattr.getChildren()) {
-                log.debug("-----");
-                log.debug(cobj.getRmTypeName() + " " +cobj.path());				
-
                 if (cobj instanceof CComplexObject) {
                     validateSpecialisedCComplexObject((CComplexObject)cobj, archetype, parentArchetype, childSpecialisationDepth, errors);
                 } else if (cobj instanceof ConstraintRef) {
@@ -383,7 +372,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
                     getIntervalFormalString(cardAttr.getInterval()), cattr.path(), getIntervalFormalString(cardParentAttr.getInterval()), attrInParentArchetype.path()));
         } else if (cardParentAttr.getInterval().getLower().compareTo(
                 cardAttr.getInterval().getLower()) >0) {
-            log.debug("Cardinality error");
             errors.add(new ValidationError(ErrorType.VSANCC, null,
                     getIntervalFormalString(cardAttr.getInterval()), cattr.path(), getIntervalFormalString(cardParentAttr.getInterval()), attrInParentArchetype.path()));	
         }				
@@ -436,14 +424,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
 
             if (!archetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()).equals(
                     parentArchetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()))) {
-                if (archetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()) !=null) {				    
-                    log.debug("child desc: "+archetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()).getText());
-                    log.debug("child desc: "+archetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()).getDescription());
-                }
-                if (parentArchetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()) !=null) {
-                    log.debug("parent desc: "+ parentArchetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()).getText());
-                    log.debug("parent desc: "+ parentArchetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()).getDescription());
-                }
                 // if the node doesn't exist in the parent at all, this is a VATDF error, checked elsewhere.
                 if (parentArchetype.getOntology().termDefinition(langPrim, ccobj.getNodeId()) != null) {
                     errors.add(new ValidationError(ErrorType.VSONIR, "TEXTDESCRIPTION",
@@ -607,7 +587,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
             }
 
             if (!assignable) {
-                log.debug("VSONCT error: at "+child.path());
                 String parentRefTypes = "";
                 for (Entry<CObject,Class> parentToRMTypeWithoutGenerics: parentObjectsToRMTypesWithoutGenerics.entrySet()) {
                     parentRefTypes += parentToRMTypeWithoutGenerics.getValue().getSimpleName() +", ";
@@ -669,8 +648,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
      * @return
      */
     private String getExpectedPathInParentArchetype(String path, int parentArchetypeSpecialisationDepth) {
-        log.debug("Path to unspecialise: "+ path);
-        log.debug("parent specialisation depth: "+ parentArchetypeSpecialisationDepth);
         String sep=ArchetypeConstraint.PATH_SEPARATOR;
         String expectedPath=path.startsWith(sep) ? sep :""; // only add the separator to the beginning if it is there in the original path (which may also be a simple node id...
         ArrayList<String> pathParts = new ArrayList<String>(Arrays.asList(StringUtils.split(path, sep)));
@@ -691,7 +668,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
                 pathPart = pathPart.substring(0, pathPart.length()-2); // need to get the non-redefined node then, going up in the hierarchy as much as possible
             }
             if (pathPart.endsWith("at0")) { // newly introduced node
-                log.debug("Path ends with at0: "+ pathPart +" "+expectedPath);
                 return null;
             }
             expectedPath += pathPart + pathEnd+sep; 
@@ -699,7 +675,6 @@ public class SpecialisedArchetypeValidator extends ArchetypeValidator {
         if (expectedPath.length() >1 && expectedPath.endsWith(sep)) {
             expectedPath = expectedPath.substring(0,expectedPath.length()-1); // get rid of tailing separator
         }
-        log.debug("Unspecialised Path: "+ expectedPath);
 
         return expectedPath;
 
