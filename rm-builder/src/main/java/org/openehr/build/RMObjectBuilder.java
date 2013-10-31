@@ -16,6 +16,7 @@ package org.openehr.build;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -36,6 +37,7 @@ import org.openehr.rm.Attribute;
 import org.openehr.rm.FullConstructor;
 import org.openehr.rm.RMObject;
 import org.openehr.rm.common.archetyped.Archetyped;
+import org.openehr.rm.common.archetyped.Locatable;
 import org.openehr.rm.common.changecontrol.Contribution;
 import org.openehr.rm.common.changecontrol.OriginalVersion;
 import org.openehr.rm.common.generic.Attestation;
@@ -46,24 +48,31 @@ import org.openehr.rm.common.generic.PartyRelated;
 import org.openehr.rm.common.generic.PartySelf;
 import org.openehr.rm.composition.Composition;
 import org.openehr.rm.composition.EventContext;
+import org.openehr.rm.composition.content.ContentItem;
 import org.openehr.rm.composition.content.entry.Action;
 import org.openehr.rm.composition.content.entry.Activity;
 import org.openehr.rm.composition.content.entry.AdminEntry;
+import org.openehr.rm.composition.content.entry.CareEntry;
+import org.openehr.rm.composition.content.entry.Entry;
 import org.openehr.rm.composition.content.entry.Evaluation;
 import org.openehr.rm.composition.content.entry.ISMTransition;
 import org.openehr.rm.composition.content.entry.Instruction;
 import org.openehr.rm.composition.content.entry.InstructionDetails;
 import org.openehr.rm.composition.content.entry.Observation;
 import org.openehr.rm.composition.content.navigation.Section;
+import org.openehr.rm.datastructure.DataStructure;
+import org.openehr.rm.datastructure.history.Event;
 import org.openehr.rm.datastructure.history.History;
 import org.openehr.rm.datastructure.history.IntervalEvent;
 import org.openehr.rm.datastructure.history.PointEvent;
 import org.openehr.rm.datastructure.itemstructure.ItemList;
 import org.openehr.rm.datastructure.itemstructure.ItemSingle;
+import org.openehr.rm.datastructure.itemstructure.ItemStructure;
 import org.openehr.rm.datastructure.itemstructure.ItemTable;
 import org.openehr.rm.datastructure.itemstructure.ItemTree;
 import org.openehr.rm.datastructure.itemstructure.representation.Cluster;
 import org.openehr.rm.datastructure.itemstructure.representation.Element;
+import org.openehr.rm.datastructure.itemstructure.representation.Item;
 import org.openehr.rm.datatypes.basic.DvBoolean;
 import org.openehr.rm.datatypes.basic.DvIdentifier;
 import org.openehr.rm.datatypes.basic.DvState;
@@ -85,12 +94,14 @@ import org.openehr.rm.datatypes.text.DvParagraph;
 import org.openehr.rm.datatypes.text.DvText;
 import org.openehr.rm.datatypes.uri.DvEHRURI;
 import org.openehr.rm.datatypes.uri.DvURI;
+import org.openehr.rm.demographic.Actor;
 import org.openehr.rm.demographic.Address;
 import org.openehr.rm.demographic.Agent;
 import org.openehr.rm.demographic.Capability;
 import org.openehr.rm.demographic.Contact;
 import org.openehr.rm.demographic.Group;
 import org.openehr.rm.demographic.Organisation;
+import org.openehr.rm.demographic.Party;
 import org.openehr.rm.demographic.PartyIdentity;
 import org.openehr.rm.demographic.PartyRelationship;
 import org.openehr.rm.demographic.Person;
@@ -140,9 +151,6 @@ public class RMObjectBuilder {
 		this(new HashMap<SystemValue, Object>());
 	}
 
-	/**
-	 * Load all reference types that are possible to instantiate using an {@link FullConstructor} annotation.
-	 */
 	private void loadTypeMap() {
 		Class<?>[] classes = {
 				// implied types
@@ -181,6 +189,11 @@ public class RMObjectBuilder {
 				Address.class,         PartyIdentity.class,   Agent.class,           Group.class,
 				Organisation.class,    Person.class,          Contact.class,         PartyRelationship.class, 
 				Role.class,            Capability.class,
+                
+                // abstract classes
+                Locatable.class,       ItemStructure.class,   DataStructure.class,   Event.class,
+                Item.class,            ContentItem.class,     Entry.class,           CareEntry.class,
+                Party.class,           Actor.class,
 		};
 
 		Map<String, Class<?>> newTypeMap = new HashMap<String, Class<?>>();
@@ -274,6 +287,10 @@ public class RMObjectBuilder {
 	 * @return null if not found
 	 */
 	public Constructor<?> fullConstructor(Class<?> rmClass) {
+        if (Modifier.isAbstract(rmClass.getModifiers()))
+        {
+            return null;
+        }
 		Constructor<?>[] array = rmClass.getConstructors();
 		for (Constructor<?> constructor : array) {
 			if (constructor.isAnnotationPresent(FullConstructor.class)) {
@@ -336,16 +353,30 @@ public class RMObjectBuilder {
 				throw new AttributeFormatException(String.format(
 						"failed to create new instance of %s: wrong format for type", rmClassName), e);
 			}
+            
+            if (e instanceof InvocationTargetException)
+            {
+                Throwable target = ((InvocationTargetException) e).getTargetException();
+                if (target instanceof Exception)
+                {
+                    e = (Exception)target;
+                }
+            }
 
 			throw new RMObjectBuildingException(String.format(
-					"failed to create new instance of %s: %s, valueMap: %s",
-					rmClassName, e.getMessage(), toString(valueMap), e));
+					"failed to create new instance of %s: %s: %s, valueMap: %s",
+					rmClassName, e.getClass().getSimpleName(), e.getMessage(), toString(valueMap), e));
 		}
 	}
 
 	public Class<?> retrieveRMType(String rmClassName)
 			throws RMObjectBuildingException {
 		rmClassName = toClassName(rmClassName);
+        int idx = rmClassName.indexOf("<");
+        if (idx != -1)
+        {
+            rmClassName = rmClassName.substring(0, idx);
+        }
 		Class<?> rmClass = typeMap.get(rmClassName.toUpperCase());
 		if (rmClass == null) {
 			throw new RMObjectBuildingException(String.format("RM type unknown: %s", rmClassName));
@@ -388,17 +419,22 @@ public class RMObjectBuilder {
 			return null;
 		}
 		String stripped = StringUtils.strip(input);
-		if (stripped.startsWith("<")) {
-			stripped = stripped.substring(1);
-		}
-		if (stripped.endsWith(">")) {
-			stripped = stripped.substring(0, stripped.length() - 1);
-		}
+// this breaks DvInterval<DvDate>
+//		if (stripped.startsWith("<")) {
+//			stripped = stripped.substring(1);
+//		}
+//		if (stripped.endsWith(">")) {
+//			stripped = stripped.substring(0, stripped.length() - 1);
+//		}
 
 		String[] array = StringUtils.splitByCharacterTypeCamelCase(stripped);
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < array.length; i++) {
 			String s = array[i];
+            if (s.startsWith("<") || s.startsWith(">")) { // DV_INTERVAL<DV_DATE>
+                buf.append(s);
+                continue;
+            }
 			if (!startsWithALetter(s)) {
 				continue;
 			}
@@ -412,17 +448,29 @@ public class RMObjectBuilder {
 			return null;
 		}
 		String stripped = StringUtils.strip(input);
-		if (stripped.startsWith("<")) {
-			stripped = stripped.substring(1);
-		}
-		if (stripped.endsWith(">")) {
-			stripped = stripped.substring(0, stripped.length() - 1);
-		}
+// this breaks DV_INTERVAL<DV_DATE>
+//		if (stripped.startsWith("<")) {
+//			stripped = stripped.substring(1);
+//		}
+//		if (stripped.endsWith(">")) {
+//			stripped = stripped.substring(0, stripped.length() - 1);
+//		}
 
 		String[] array = StringUtils.splitByCharacterTypeCamelCase(stripped);
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < array.length; i++) {
 			String s = array[i];
+            if (s.startsWith("<") || s.startsWith(">")) { // DvInterval<DvDate>
+                if (buf.length() > 0) {
+                    int last = buf.length()-1;
+                    char c = buf.charAt(last);
+                    if ('_' == c) {
+                        buf.deleteCharAt(last);
+                    }
+                }
+                buf.append(s);
+                continue;
+            }
 			if (!startsWithALetter(s)) {
 				continue;
 			}
