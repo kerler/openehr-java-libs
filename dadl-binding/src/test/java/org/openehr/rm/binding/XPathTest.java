@@ -1,15 +1,13 @@
 package org.openehr.rm.binding;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.jxpath.JXPathContext;
-import org.openehr.am.archetype.Archetype;
-import org.openehr.rm.Attribute;
+import org.openehr.build.XPathUtil;
 import org.openehr.rm.common.archetyped.Archetyped;
-import org.openehr.rm.composition.Composition;
 import org.openehr.rm.datastructure.itemstructure.ItemTree;
 import org.openehr.rm.datastructure.itemstructure.representation.Cluster;
 import org.openehr.rm.datastructure.itemstructure.representation.Element;
@@ -20,13 +18,10 @@ import org.openehr.rm.datatypes.text.DvCodedText;
 import org.openehr.rm.datatypes.text.DvText;
 import org.openehr.rm.support.measurement.MeasurementService;
 
+// this test is here rather than in rm-builder because it reads .dadl files to do testing with
+
 public class XPathTest extends DADLBindingTestBase {
 	
-	public void testCreatePathMapWithOrderSet() throws Exception {
-		Composition composition = (Composition) bind("order_set1.dadl");
-		assertEquals(3, composition.getContent().size());
-	}
-
 	public void testGetValue() throws Exception {
 		ItemTree tree = createTree();
 		JXPathContext context = JXPathContext.newContext(tree);
@@ -35,12 +30,6 @@ public class XPathTest extends DADLBindingTestBase {
 				context.getValue("/items[2]/items[2]/name/value"));
 	}
 	
-	public void testAttributeItemsExistsInCluster() throws Exception {
-		RMInspector inspector = RMInspector.getInstance();
-		Map<String, Attribute> attributeMap = inspector.attributeMap(Cluster.class);
-		assertTrue(attributeMap.containsKey("items"));
-	}
-
 	public void testCreatePathMapWithDefaultTree() throws Exception {
 		ItemTree tree = createTree();
 		XPathUtil util = new XPathUtil();
@@ -143,14 +132,14 @@ public class XPathTest extends DADLBindingTestBase {
 		assertTrue(set.contains("/items[4]"));	
 	}
 	
-	public void testExtratRootPathWithOneSlot() throws Exception {
+	public void testExtractRootPathWithOneSlot() throws Exception {
 		ItemTree tree = (ItemTree) bind("tree_slot.dadl"); 
 		Set<String> paths = new XPathUtil().extractRootXPaths(tree);
 		assertEquals(1, paths.size());
 		assertTrue(paths.contains("/items[4]"));		
 	}
 	
-	public void testExtratRootPathWithTwoSlots() throws Exception {
+	public void testExtractRootPathWithTwoSlots() throws Exception {
 		ItemTree tree = (ItemTree) bind("tree_2_slots.dadl"); 
 		Set<String> paths = new XPathUtil().extractRootXPaths(tree);
 		assertEquals(2, paths.size());
@@ -158,14 +147,14 @@ public class XPathTest extends DADLBindingTestBase {
 		assertTrue(paths.contains("/items[5]"));
 	}
 	
-	public void testExtracRootPathWithNestedSlot() throws Exception {
+	public void testExtractRootPathWithNestedSlot() throws Exception {
 		ItemTree tree = (ItemTree) bind("tree_nested_slot.dadl");
 		Set<String> paths = new XPathUtil().extractRootXPaths(tree);
 		assertEquals(1, paths.size());
 		assertTrue(paths.contains("/items[4]"));
 	}
 	
-	public void testExtracRootPathWithDoubleNestedSlot() throws Exception {
+	public void testExtractRootPathWithDoubleNestedSlot() throws Exception {
 		ItemTree tree = (ItemTree) bind("tree_nested_slot2.dadl");
 		Set<String> paths = new XPathUtil().extractRootXPaths(tree);
 		assertEquals(1, paths.size());
@@ -340,10 +329,6 @@ public class XPathTest extends DADLBindingTestBase {
 		assertTrue(set.contains("/items[5]/items[3]"));
 	}
 
-	private InputStream loadFromClasspath(String adl) throws Exception {
-		return this.getClass().getClassLoader().getResourceAsStream(adl);
-	}
-
 	public void testExtractXPaths() throws Exception {
 		ItemTree tree = createTree();
 		XPathUtil util = new XPathUtil();
@@ -381,7 +366,7 @@ public class XPathTest extends DADLBindingTestBase {
 		items.add(sampleElement());
 		items.add(cluster());
 		items.add(commentElement());
-		return new ItemTree("at0007", new DvText("biochemstry result"),
+		return new ItemTree("at0007", new DvText("biochemistry result"),
 				items);
 	}
 	
@@ -405,20 +390,11 @@ public class XPathTest extends DADLBindingTestBase {
 		String aid = "adl-test-ITEM_TREE.test_tree.v1";
 		Archetyped details = new Archetyped(aid, "1.0.1");
 		ItemTree tree = new ItemTree(null, aid, 
-				new DvText("biochemstry result"), details, null, null, null, items);
-		
-		writeDADL("tree_2_slots.dadl", tree);		
-		
+				new DvText("biochemistry result"), details, null, null, null, items);
 		return tree;
 	}
 	
 		
-	private void writeDADL(String name, Object obj) throws Exception {
-		DADLBinding binding = new DADLBinding();
-		List<String> lines = binding.toDADL(obj);
-		FileUtils.writeLines(new File(name), lines);
-	}
-
 	/**
 	 * /sample 
 	 * /sample (repeated) 
@@ -438,7 +414,7 @@ public class XPathTest extends DADLBindingTestBase {
 		items.add(sampleElement());
 		items.add(cluster());
 		items.add(comment);
-		return new ItemTree("at0007", new DvText("biochemstry result"),
+		return new ItemTree("at0007", new DvText("biochemistry result"),
 				items);
 	}
 	
@@ -479,7 +455,7 @@ public class XPathTest extends DADLBindingTestBase {
 		// repeated cluster
 		items.add(cluster());		
 		items.add(comment);
-		itemTree = new ItemTree("at0007", new DvText("biochemstry result"),
+		itemTree = new ItemTree("at0007", new DvText("biochemistry result"),
 				items);
 		return itemTree;
 	}
@@ -488,14 +464,14 @@ public class XPathTest extends DADLBindingTestBase {
 		Element totalCholesterol;
 		Element ldlCholesterol;
 		Element hdlCholesterol;
-		MeasurementService measureServ = TestMeasurementService.getInstance();
+		MeasurementService measurementService = TestMeasurementService.getInstance();
 		totalCholesterol = new Element("at0002",
 				new DvText("total cholesterol"), new DvQuantity("mmol/L", 6.1,
-						measureServ));
+						measurementService));
 		ldlCholesterol = new Element("at0003", new DvText("LDL cholesterol"),
-				new DvQuantity("mmol/L", 0.9, measureServ));
+				new DvQuantity("mmol/L", 0.9, measurementService));
 		hdlCholesterol = new Element("at0004", new DvText("HDL cholesterol"),
-				new DvQuantity("mmol/L", 5.2, measureServ));
+				new DvQuantity("mmol/L", 5.2, measurementService));
 		List<Item> items = new ArrayList<Item>();
 		items.add(totalCholesterol);
 		items.add(ldlCholesterol);
@@ -524,40 +500,14 @@ public class XPathTest extends DADLBindingTestBase {
 	}	
 	
 	private static class TestMeasurementService implements MeasurementService {
-
-		/* fields */
-		/**
-		 * Returns True if the units string according to the HL7 UCUM
-		 * specification.
-		 * 
-		 * @param units
-		 * @return true if units valid
-		 * @throws IllegalArgumentException
-		 *             if units null
-		 */
 		public boolean isValidUnitsString(String units) {
 			return true;
 		}
 
-		/**
-		 * Return True if two units strings correspond to the same measured
-		 * property.
-		 * 
-		 * @param units1
-		 * @param units2
-		 * @return true if two units equal
-		 * @throws IllegalArgumentException
-		 *             if units1 or units2 null
-		 */
 		public boolean unitsEquivalent(String units1, String units2) {
 			return true;
 		}
 
-		/**
-		 * Return a new instance of test measurement service
-		 * 
-		 * @return
-		 */
 		public static MeasurementService getInstance() {
 			return new TestMeasurementService();
 		}

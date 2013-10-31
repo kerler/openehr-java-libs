@@ -27,15 +27,15 @@ public class RMBindingTest extends XMLBindingTestBase {
 	// Parse a complete versioned_composition from a XML file
 	// and bind the data to RM objects and then inspect the details
 	public void testParseAndBindToOriginalVersion() throws Exception {
-		VERSION xobj = VersionDocument.Factory.parse(
+		VERSION document = VersionDocument.Factory.parse(
 				fromClasspath("original_version_002.xml")).getVersion();
 		
-		assertTrue("expected originial_version, but got: " 
-				+ (xobj == null ? null : xobj.getClass()),
-				xobj instanceof ORIGINALVERSION);
+		assertTrue("expected original_version, but got: "
+				+ (document == null ? null : document.getClass()),
+				document instanceof ORIGINALVERSION);
 
 		// do the data binding
-		Object rmObj = binding.bindToRM(xobj);
+		Object rmObj = binding.bindToRM(document);
 		
 		assertTrue("rmObj not a OriginalVersion, got "
 				+ (rmObj == null ? null : rmObj.getClass()),
@@ -48,14 +48,12 @@ public class RMBindingTest extends XMLBindingTestBase {
 		
 		assertEquals("section.items.size wrong", 1, section.getItems().size());
 		
-		Observation obser = (Observation) section.getItems().get(0);
+		Observation observation = (Observation) section.getItems().get(0);
 		
-		assertNotNull("observation is null", obser);
+		assertNotNull("observation is null", observation);
 		
 		assertEquals("openEHR-EHR-OBSERVATION.laboratory-lipids.v1",
-				obser.getArchetypeNodeId());
-		
-		//printXML(orgVer);
+				observation.getArchetypeNodeId());
 		
 		String path;
 		
@@ -69,7 +67,7 @@ public class RMBindingTest extends XMLBindingTestBase {
 		assertEquals("Lipids", comp.itemAtPath("/archetype_details/template_id/value"));
 		
 		// verify the observation
-		assertEquals("openEHR-EHR-OBSERVATION.laboratory-lipids.v1", obser.getArchetypeNodeId());
+		assertEquals("openEHR-EHR-OBSERVATION.laboratory-lipids.v1", observation.getArchetypeNodeId());
 		
 		path = "/content[openEHR-EHR-SECTION.findings.v1]";
 		assertTrue(comp.itemAtPath(path) instanceof Section);

@@ -8,17 +8,11 @@ import org.openehr.rm.common.archetyped.Archetyped;
 import org.openehr.rm.common.generic.PartySelf;
 import org.openehr.rm.support.identification.ArchetypeID;
 import org.openehr.rm.support.identification.TerminologyID;
-import org.openehr.rm.support.measurement.MeasurementService;
-import org.openehr.rm.support.measurement.SimpleMeasurementService;
-import org.openehr.rm.support.terminology.TerminologyService;
-import org.openehr.terminology.SimpleTerminologyService;
 
 public class CommonSupportBuildTest extends BuildTestBase {
 	
 	public CommonSupportBuildTest() throws Exception {
 		builder = new RMObjectBuilder();
-		ms =  SimpleMeasurementService.getInstance();
-		ts = SimpleTerminologyService.getInstance();
 	}
 	
 	public void setUp() {
@@ -60,6 +54,4 @@ public class CommonSupportBuildTest extends BuildTestBase {
 	private Map<String, Object> valueMap;
 	private RMObject rmObj;
 	private RMObjectBuilder builder;
-	private MeasurementService ms;
-	private TerminologyService ts;
 }

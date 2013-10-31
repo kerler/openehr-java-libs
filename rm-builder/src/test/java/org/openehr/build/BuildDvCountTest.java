@@ -8,7 +8,6 @@ import java.util.Map;
 import org.openehr.rm.RMObject;
 import org.openehr.rm.datatypes.quantity.DvCount;
 import org.openehr.rm.datatypes.quantity.DvInterval;
-import org.openehr.rm.datatypes.quantity.DvOrdered;
 import org.openehr.rm.datatypes.quantity.ReferenceRange;
 import org.openehr.rm.datatypes.text.DvText;
 
@@ -71,8 +70,8 @@ public class BuildDvCountTest extends BuildTestBase {
         try {
             obj = builder.construct(type, values);
             fail("attribute format exception should be thrown here");
-        } catch (Exception e) {
-            assertTrue(e instanceof AttributeFormatException);
+        } catch (AttributeFormatException e) {
+			// ok
         }
     }
 

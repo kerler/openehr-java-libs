@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.openehr.am.archetype.constraintmodel.CMultipleAttribute;
 import org.openehr.am.archetype.constraintmodel.CObject;
 import org.openehr.rm.Attribute;
@@ -300,13 +299,11 @@ public class RMInspector {
 	 * @return null if not found
 	 */
 	public Class retrieveRMType(String rmClassName) {
-	    log.debug("Getting rmClass for "+rmClassName);
 		Class rmClass = typeMap.get(rmClassName);
 		if (rmClass == null) {
 			rmClass = upperCaseMap.get(rmClassName.replace("_", ""));
 		}
 
-		log.debug("Retrieved rmClass is: "+ rmClass);
 		return rmClass;
 	}
 	
@@ -315,21 +312,14 @@ public class RMInspector {
 	 * 
 	 * @param rmClassName
 	 * @return
-	 * @throws RMObjectBuildingException
 	 */
 	public Map<String, Class> retrieveRMAttributes(String rmClassName) {
 		Class rmClass = retrieveRMType(rmClassName);
 	
-		log.debug("----- rmClassName: "+ rmClassName);
-		log.debug("rmClass: "+ rmClass.getSimpleName());
-		
-		
 		Map<String, Class> map = attributeType(rmClass);
 		Map<String, Class> ret = new HashMap<String, Class>();
 		for(String name : map.keySet()) {
 			ret.put(toUnderscoreSeparated(name), map.get(name));
-			
-			log.debug("rmattribute: " +name +": "+ map.get(name));			
 		}
 		return ret;
 	}
@@ -340,21 +330,15 @@ public class RMInspector {
 	 * 
 	 * @param rmClassName
 	 * @return
-	 * @throws RMObjectBuildingException
 	 */
 	public Set<String> retrieveRMAttributeNames(String rmClassName) {
 		Class rmClass = retrieveRMType(rmClassName);
 		
 		// WHAT TO DO HERE IF not found (e.g. CODED_TEXT would not be found...)
-		log.debug("----- rmClassName: "+ rmClassName);
-		log.debug("rmClass: "+ rmClass.getSimpleName());
-		
 		Map<String, Class> map = attributeType(rmClass);
 		Set<String> names = new LinkedHashSet<String>();
 		for(String name : map.keySet()) {
 			names.add(toUnderscoreSeparated(name));
-			
-			log.debug("name: " +name);
 		}
 		return names;
 	}
@@ -400,8 +384,6 @@ public class RMInspector {
 
 		for (Class rmClass : typeMap.values()) {
 
-			log.debug("matching rmClass: " + rmClass.getName());
-
 			if (simpleTypes.contains(rmClass.getSimpleName())) {
 				continue; // skip simple value types
 			}
@@ -434,15 +416,10 @@ public class RMInspector {
 				Attribute attribute = (Attribute) annotations[i][0];
 				attributes.add(attribute.name());
 
-				log.debug("checking attribute: " + attribute.name());
-
 				String attrName = attribute.name();
 				Object attrValue = filteredMap.get(attrName);
 
 				if (attribute.required() && attrValue == null) {
-
-					log.debug("missing required attribute..");
-
 					matched = false;
 					break;
 
@@ -451,13 +428,11 @@ public class RMInspector {
 							|| ((attrValue instanceof Integer) && types[i] != Integer.class)
 							|| ((attrValue instanceof Double) && types[i] != double.class)) {
 
-						log.debug("wrong primitive value type for attribute..");
 						matched = false;
 						break;
 
 					} else if (!types[i].isPrimitive()
 							&& !types[i].isInstance(attrValue)) {
-						log.debug("wrong value type for attribute..");
 						matched = false;
 						break;
 
@@ -468,8 +443,6 @@ public class RMInspector {
 			for (String attr : filteredMap.keySet()) {
 				if (!attributes.contains(attr)) {
 
-					log.debug("unknown attribute: " + attr);
-
 					matched = false;
 				}
 			}
@@ -477,8 +450,6 @@ public class RMInspector {
 			// matching found
 			if (matched) {
 				String className = rmClass.getSimpleName();
-				
-				log.debug(">>> MATCHING FOUND: " + className);
 				
 				return className;
 			}
@@ -518,17 +489,13 @@ public class RMInspector {
 	 * @return
 	 */
 	Interval<Integer> defaultCardinalityInterval(CMultipleAttribute cattr, CObject parentObj) {
-		log.debug("Checking: "+ cattr.getRmAttributeName() +"; "+ parentObj.getRmTypeName() +" at "+cattr.path() +" parent path: "+parentObj.path());
-		
 		if (cattr.getRmAttributeName().equals("items")) {
 			if (parentObj.getRmTypeName().equalsIgnoreCase("CLUSTER") ||
 					parentObj.getRmTypeName().equalsIgnoreCase("SECTION")) {
-				log.debug("--> >=1");				
 				return new Interval<Integer>(1,null);				
 			}
 		} else if (cattr.getRmAttributeName().equals("content")) {
 			if (parentObj.getRmTypeName().equalsIgnoreCase("COMPOSITION")) {
-				log.debug("--> >=1");				
 				return new Interval<Integer>(1,null);				
 			}
 	/*	}  else if (cattr.getRmAttributeName().equals("activities")) { // This seems to be incorrect 
@@ -538,16 +505,13 @@ public class RMInspector {
 			}
 	*/	}  else if (cattr.getRmAttributeName().equals("events")) {
 			if (parentObj.getRmTypeName().equalsIgnoreCase("HISTORY")) {
-				log.debug("--> >=1");				
 				return new Interval<Integer>(1,null);				
 			}
 		} else if (cattr.getRmAttributeName().equals("credentials")) {
 			if (parentObj.getRmTypeName().equalsIgnoreCase("CAPABILITY")) {
-				log.debug("--> ==1");				
 				return new Interval<Integer>(1,1);				
 			}
 		}
-		log.debug("--> >=0");				
 		return new Interval<Integer>(0,null); // not constrained
 		
 	}
@@ -565,9 +529,6 @@ public class RMInspector {
 	};
 
 	
-	/* logger */
-	private static final Logger log = Logger.getLogger(RMInspector.class);
-
 	// loaded rm type map
 	private Map<String, Class> typeMap;
 	private Map<String, Class> upperCaseMap;

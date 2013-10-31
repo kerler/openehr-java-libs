@@ -2,9 +2,9 @@ package org.openehr.rm.binding;
 
 import java.io.InputStream;
 
-import org.openehr.am.parser.*;
-
 import junit.framework.TestCase;
+import org.openehr.am.parser.ContentObject;
+import org.openehr.am.parser.DADLParser;
 
 public class DADLBindingTestBase extends TestCase {
 

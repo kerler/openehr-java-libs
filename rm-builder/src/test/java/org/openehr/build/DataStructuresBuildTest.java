@@ -20,12 +20,21 @@
  */
 package org.openehr.build;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.openehr.rm.RMObject;
 import org.openehr.rm.datastructure.history.Event;
 import org.openehr.rm.datastructure.history.History;
 import org.openehr.rm.datastructure.history.IntervalEvent;
 import org.openehr.rm.datastructure.history.PointEvent;
-import org.openehr.rm.datastructure.itemstructure.*;
+import org.openehr.rm.datastructure.itemstructure.ItemList;
+import org.openehr.rm.datastructure.itemstructure.ItemSingle;
+import org.openehr.rm.datastructure.itemstructure.ItemStructure;
+import org.openehr.rm.datastructure.itemstructure.ItemTable;
+import org.openehr.rm.datastructure.itemstructure.ItemTree;
 import org.openehr.rm.datastructure.itemstructure.representation.Cluster;
 import org.openehr.rm.datastructure.itemstructure.representation.Element;
 import org.openehr.rm.datastructure.itemstructure.representation.Item;
@@ -35,8 +44,6 @@ import org.openehr.rm.datatypes.quantity.datetime.DvDuration;
 import org.openehr.rm.datatypes.text.CodePhrase;
 import org.openehr.rm.datatypes.text.DvCodedText;
 import org.openehr.rm.datatypes.text.DvText;
-
-import java.util.*;
 
 public class DataStructuresBuildTest extends BuildTestBase {
     
@@ -131,14 +138,14 @@ public class DataStructuresBuildTest extends BuildTestBase {
         assertEquals("name", name, itemSingle.getName());
         assertEquals("item", element, itemSingle.getItem());
 
-        // test with clas
+        // test with class
         builder.construct("ITEM_SINGLE", values);
     }
 
     public void testBuildItemTable() throws Exception {
         Map<String, Object> values = new HashMap<String, Object>();
         String archetypeNodeId = "at0001";
-        DvText name = new DvText("test item talbe", lang, charset, ts);
+        DvText name = new DvText("test item table", lang, charset, ts);
         List<Cluster> rows = tableRows();
 
         values.put("archetypeNodeId", archetypeNodeId);
@@ -222,7 +229,7 @@ public class DataStructuresBuildTest extends BuildTestBase {
                 intEvent.intervalStartTime());
     }
 
-    public void testBuildHistoy() throws Exception {
+    public void testBuildHistory() throws Exception {
         Map<String, Object> values = new HashMap<String, Object>();
         String archetypeNodeId = "at0001";
         DvText name = new DvText("test history", lang, charset, ts);
@@ -242,7 +249,7 @@ public class DataStructuresBuildTest extends BuildTestBase {
                 history.getArchetypeNodeId());
         assertEquals("name", name, history.getName());
         assertEquals("origin", origin, history.getOrigin());
-        assertEquals("eventd", events, history.getEvents());
+        assertEquals("event", events, history.getEvents());
     }   
 }
 /*

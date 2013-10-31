@@ -21,7 +21,13 @@ package org.openehr.build;
  * @version 1.0
  */
 
+@SuppressWarnings("UnusedDeclaration")
 public class RMObjectBuildingException extends Exception {
+
+	public RMObjectBuildingException(String message, Throwable cause, ErrorType errorType) {
+     super(message, cause);
+     this.errorType = errorType;
+ }
 
     public RMObjectBuildingException(String message, Throwable cause) {
         super(message, cause);

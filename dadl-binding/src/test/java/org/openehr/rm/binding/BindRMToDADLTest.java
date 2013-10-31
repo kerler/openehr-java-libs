@@ -1,7 +1,10 @@
 package org.openehr.rm.binding;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.openehr.rm.composition.content.entry.Observation;
 import org.openehr.rm.datastructure.history.History;
@@ -152,14 +155,7 @@ public class BindRMToDADLTest extends DADLBindingTestBase {
 					actual.get(i).trim());
 		}
 	}
-	
-	private void print(List<String> lines) {
-		System.out.println("total lines: " + lines.size());
-		for(Iterator<String> it = lines.iterator(); it.hasNext();) {
-			System.out.println(it.next());
-		}
-	}
-	
+
 	private List<String> expected;
 	private List<String> actual;
 }

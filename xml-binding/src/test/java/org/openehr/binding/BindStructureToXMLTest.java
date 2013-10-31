@@ -1,10 +1,10 @@
 package org.openehr.binding;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import javax.xml.namespace.QName;
 
-import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
 import org.openehr.rm.common.archetyped.Archetyped;
 import org.openehr.rm.common.changecontrol.OriginalVersion;
@@ -14,7 +14,6 @@ import org.openehr.rm.composition.content.entry.Observation;
 import org.openehr.rm.datastructure.history.Event;
 import org.openehr.rm.datastructure.history.History;
 import org.openehr.rm.datastructure.history.PointEvent;
-import org.openehr.rm.datastructure.itemstructure.ItemList;
 import org.openehr.rm.datastructure.itemstructure.ItemStructure;
 import org.openehr.rm.datastructure.itemstructure.ItemTree;
 import org.openehr.rm.datastructure.itemstructure.representation.Element;
@@ -26,9 +25,17 @@ import org.openehr.rm.datatypes.text.DvCodedText;
 import org.openehr.rm.datatypes.text.DvText;
 import org.openehr.rm.support.identification.ArchetypeID;
 import org.openehr.rm.support.terminology.TerminologyService;
-import org.openehr.schemas.v1.*;
+import org.openehr.schemas.v1.DVQUANTITY;
+import org.openehr.schemas.v1.DVTEXT;
+import org.openehr.schemas.v1.ELEMENT;
+import org.openehr.schemas.v1.ITEMTREE;
+import org.openehr.schemas.v1.OBSERVATION;
+import org.openehr.schemas.v1.ORIGINALVERSION;
+import org.openehr.schemas.v1.VERSION;
+import org.openehr.schemas.v1.VersionDocument;
 import org.openehr.terminology.SimpleTerminologyService;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class BindStructureToXMLTest extends XMLBindingTestBase {
 	
 	public void testBindElementToXML() throws Exception {
@@ -41,7 +48,7 @@ public class BindStructureToXMLTest extends XMLBindingTestBase {
 		
 		ELEMENT xmlElement = (ELEMENT) obj;
 		assertTrue("value type wrong", xmlElement.getValue() instanceof DVTEXT);
-		
+
 		DVTEXT xmlText = (DVTEXT) xmlElement.getValue();
 		assertEquals("text value wrong", "new text", xmlText.getValue());
 	}
@@ -78,15 +85,11 @@ public class BindStructureToXMLTest extends XMLBindingTestBase {
 		
 		ItemTree tree = new ItemTree("at0003", "item tree", items);
 		
-		//printXML(tree);
-		
 		Object obj = binding.bindToXML(tree);
 		
 		assertTrue("XML class wrong", obj instanceof ITEMTREE);
-		
+
 		ITEMTREE xmlTree = (ITEMTREE) obj;		
-		
-		//System.out.println(xmlTree.toString());
 		
 		assertEquals("items.size wrong", 2, xmlTree.getItemsArray().length);
 		
@@ -137,60 +140,46 @@ public class BindStructureToXMLTest extends XMLBindingTestBase {
 				archetypeDetails, language, encoding, subject, provider,
                 data, terminologyService);		
 		        		
-		//printXML(obs);
-		
 		Object obj = binding.bindToXML(obs);
-		
-		// System.out.println(obj.toString());
 		
 		assertTrue("unexpected XML class: " + obj.getClass(), 
 				obj instanceof OBSERVATION);		
 	}
 	
-	// TODO shortcut solution, load a versioned_composition
-	// thru xml file and bind it to RM objects
 	public void testBindVersionedCompositionToXML() throws Exception {
-		VERSION xobj = VersionDocument.Factory.parse(
+		VERSION document = VersionDocument.Factory.parse(
 				fromClasspath("original_version_002.xml")).getVersion();
 		
-		assertTrue("expected originial_version, but got: " 
-				+ (xobj == null ? null : xobj.getClass()),
-				xobj instanceof ORIGINALVERSION);
+		assertTrue("expected original_version, but got: "
+				+ (document == null ? null : document.getClass()),
+				document instanceof ORIGINALVERSION);
 
 		// do the data binding
-		Object rmObj = binding.bindToRM(xobj);
-		
-//		assertTrue("rmObj not a OriginalVersion, got "
-//				+ (rmObj == null ? null : rmObj.getClass()),
-//				rmObj instanceof OriginalVersion);
+		Object rmObj = binding.bindToRM(document);
 		
 		OriginalVersion orgVer = (OriginalVersion) rmObj;
 	
 		// Will throw exceptions if faulty
-		Object obj = binding.bindToXML(orgVer);
+		binding.bindToXML(orgVer);
 
-		
 		// *** Code that exemplifies pretty printing with namespace tweaks
-		XmlOptions xopt = new XmlOptions();
+		XmlOptions xmlOptions = new XmlOptions();
 		
-		xopt.setSaveOuter();
-		xopt.setSaveSyntheticDocumentElement(new QName(XMLBinding.SCHEMA_OPENEHR_ORG_V1, "version"));				
+		xmlOptions.setSaveOuter();
+		xmlOptions.setSaveSyntheticDocumentElement(new QName(XMLBinding.SCHEMA_OPENEHR_ORG_V1, "version"));				
 		
 		HashMap<String, String> uriToPrefixMap = new HashMap<String, String>();
 		//uriToPrefixMap.put(XMLBinding.SCHEMA_OPENEHR_ORG_V1, "v1");
-		xopt.setSaveSuggestedPrefixes(uriToPrefixMap);
+		xmlOptions.setSaveSuggestedPrefixes(uriToPrefixMap);
 		
-		xopt.setSaveNamespacesFirst();
-		xopt.setSaveAggressiveNamespaces();
-		xopt.setSavePrettyPrint(); 
-		xopt.setCharacterEncoding("UTF-8");
+		xmlOptions.setSaveNamespacesFirst();
+		xmlOptions.setSaveAggressiveNamespaces();
+		xmlOptions.setSavePrettyPrint(); 
+		xmlOptions.setCharacterEncoding("UTF-8");
 
 		// Uncomment two lines below if less prefixing is desired, but repeated
 		// namespace declarations are ok (in nodes containing xsi:type)
 		uriToPrefixMap.put(XMLBinding.SCHEMA_OPENEHR_ORG_V1, "");
-		xopt.setUseDefaultNamespace();
-
-		
-		// System.out.println(">>>>>>>>>> \n\r" + ((XmlObject)obj).xmlText(xopt));		
+		xmlOptions.setUseDefaultNamespace();
 	}
 }

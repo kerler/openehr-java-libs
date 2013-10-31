@@ -14,33 +14,33 @@
  */
 package org.openehr.build;
 
-import org.openehr.rm.RMObject;
-import org.openehr.rm.common.archetyped.Archetyped;
-import org.openehr.rm.common.generic.PartyProxy;
-import org.openehr.rm.composition.content.entry.Action;
-import org.openehr.rm.composition.content.entry.ISMTransition;
-import org.openehr.rm.support.identification.ArchetypeID;
-import org.openehr.rm.composition.Composition;
-import org.openehr.rm.composition.EventContext;
-import org.openehr.rm.composition.content.ContentItem;
-import org.openehr.rm.composition.content.entry.Evaluation;
-import org.openehr.rm.composition.content.entry.Instruction;
-import org.openehr.rm.composition.content.entry.Observation;
-import org.openehr.rm.composition.content.navigation.Section;
-import org.openehr.rm.datastructure.history.History;
-import org.openehr.rm.datastructure.itemstructure.ItemStructure;
-import org.openehr.rm.datatypes.quantity.datetime.DvDateTime;
-import org.openehr.rm.datatypes.text.CodePhrase;
-import org.openehr.rm.datatypes.text.DvCodedText;
-import org.openehr.rm.datatypes.text.DvText;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.openehr.rm.RMObject;
+import org.openehr.rm.common.archetyped.Archetyped;
+import org.openehr.rm.common.generic.PartyProxy;
+import org.openehr.rm.composition.Composition;
+import org.openehr.rm.composition.EventContext;
+import org.openehr.rm.composition.content.ContentItem;
+import org.openehr.rm.composition.content.entry.Action;
+import org.openehr.rm.composition.content.entry.Evaluation;
+import org.openehr.rm.composition.content.entry.ISMTransition;
+import org.openehr.rm.composition.content.entry.Instruction;
+import org.openehr.rm.composition.content.entry.Observation;
+import org.openehr.rm.composition.content.navigation.Section;
 import org.openehr.rm.datastructure.history.Event;
+import org.openehr.rm.datastructure.history.History;
 import org.openehr.rm.datastructure.history.PointEvent;
+import org.openehr.rm.datastructure.itemstructure.ItemStructure;
+import org.openehr.rm.datatypes.quantity.datetime.DvDateTime;
 import org.openehr.rm.datatypes.quantity.datetime.DvDuration;
+import org.openehr.rm.datatypes.text.CodePhrase;
+import org.openehr.rm.datatypes.text.DvCodedText;
+import org.openehr.rm.datatypes.text.DvText;
+import org.openehr.rm.support.identification.ArchetypeID;
 
 /**
  * Test case for EHR objects building
@@ -111,7 +111,7 @@ public class EHRBuildTest extends BuildTestBase {
 
     public void testBuildEvaluation() throws Exception {
         Map<String, Object> values = new HashMap<String, Object>();
-        DvText name = new DvText("test evlauation", lang, charset, ts);
+        DvText name = new DvText("test evaluation", lang, charset, ts);
         String node = "at0001";
         Archetyped archetypeDetails = new Archetyped(
             new ArchetypeID("openehr-ehr_rm-evaluation.physical_examination.v3"), "v1.0");

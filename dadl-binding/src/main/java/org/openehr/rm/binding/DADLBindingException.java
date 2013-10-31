@@ -18,6 +18,7 @@ package org.openehr.rm.binding;
  * 
  * @author rong.chen
  */
+@SuppressWarnings("UnusedDeclaration")
 public class DADLBindingException extends Exception {
 	
 	public DADLBindingException(String msg) {

@@ -13,19 +13,20 @@
  */
 package org.openehr.rm.binding;
 
-import java.io.InputStream;
-import java.util.TimeZone;
+import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.openehr.am.parser.*;
+import org.openehr.build.RMObjectBuilder;
+import org.openehr.rm.Attribute;
 import org.openehr.rm.common.archetyped.Archetyped;
 import org.openehr.rm.common.generic.PartySelf;
+import org.openehr.rm.composition.Composition;
 import org.openehr.rm.composition.content.entry.Observation;
 import org.openehr.rm.datastructure.history.Event;
 import org.openehr.rm.datastructure.history.History;
 import org.openehr.rm.datastructure.history.PointEvent;
 import org.openehr.rm.datastructure.itemstructure.ItemList;
 import org.openehr.rm.datastructure.itemstructure.ItemTree;
+import org.openehr.rm.datastructure.itemstructure.representation.Cluster;
 import org.openehr.rm.datastructure.itemstructure.representation.Element;
 import org.openehr.rm.datatypes.quantity.DvOrdinal;
 import org.openehr.rm.datatypes.quantity.DvQuantity;
@@ -33,9 +34,8 @@ import org.openehr.rm.datatypes.quantity.datetime.DvDateTime;
 import org.openehr.rm.datatypes.text.CodePhrase;
 import org.openehr.rm.datatypes.text.DvCodedText;
 import org.openehr.rm.datatypes.text.DvText;
-import org.openehr.rm.support.identification.*;
-
-import junit.framework.TestCase;
+import org.openehr.rm.support.identification.ArchetypeID;
+import org.openehr.rm.support.identification.TerminologyID;
 
 public class DADLBindingTest extends DADLBindingTestBase {
 	
@@ -47,6 +47,17 @@ public class DADLBindingTest extends DADLBindingTestBase {
 		rmObj = null;
 	}
 	
+	public void testCreatePathMapWithOrderSet() throws Exception {
+		Composition composition = (Composition) bind("order_set1.dadl");
+		assertEquals(3, composition.getContent().size());
+	}
+
+	public void testAttributeItemsExistsInCluster() throws Exception {
+		RMObjectBuilder inspector = RMObjectBuilder.getInstance();
+		Map<String, Attribute> attributeMap = inspector.getAttributes(Cluster.class);
+		assertTrue(attributeMap.containsKey("items"));
+	}
+
 	public void testBindTypedDvQuantity() throws Exception {
 		rmObj = bind("typed_dv_quantity.dadl");
 		assertTrue("rmObject not DvQuantity", rmObj instanceof DvQuantity);
@@ -59,9 +70,9 @@ public class DADLBindingTest extends DADLBindingTestBase {
 	public void testBindTypedDvOrdinal() throws Exception {
 		rmObj = bind("typed_dv_ordinal.dadl");
 		assertTrue("rmObject not DvOrdinal", rmObj instanceof DvOrdinal);
-		
-		DvOrdinal expected = new DvOrdinal(1, new DvCodedText("Sitting", 
-						new CodePhrase("SNOMED-CT", "12345678")));
+
+		new DvOrdinal(1, new DvCodedText("Sitting",
+				new CodePhrase("SNOMED-CT", "12345678")));
 	}
 	
 	public void testBindUntypedDvQuantity() throws Exception {
@@ -184,7 +195,7 @@ public class DADLBindingTest extends DADLBindingTestBase {
 				((Event) history.getEvents().get(0)).getTime());
 	}
 	
-	public void testBindTypedArchetypID() throws Exception {
+	public void testBindTypedArchetypeID() throws Exception {
 		rmObj = bind("typed_archetype_id.dadl");
 		assertNotNull("rmObject null", rmObj);
 		assertTrue("rmObject not ArchetypeID: "	+ rmObj.getClass().getName(), 
@@ -210,10 +221,10 @@ public class DADLBindingTest extends DADLBindingTestBase {
 		assertTrue("rmObject not Archetyped: "	+ rmObj.getClass().getName(), 
 				rmObj instanceof Archetyped);
 		Archetyped archetyped = (Archetyped) rmObj;
-		assertEquals("archtyped.archetypeId wrong", 
+		assertEquals("archetyped.archetypeId wrong", 
 				"openEHR-EHR-OBSERVATION.blood_pressure.v1", 
 				archetyped.getArchetypeId().getValue());
-		assertEquals("archtyped.rmVersion wrong", "1.0.1", 
+		assertEquals("archetyped.rmVersion wrong", "1.0.1", 
 				archetyped.getRmVersion());
 	}
 	
@@ -235,7 +246,7 @@ public class DADLBindingTest extends DADLBindingTestBase {
 				rmObj instanceof DvCodedText);
 		
 		DvCodedText dt = (DvCodedText) rmObj;
-		CodePhrase cp = (CodePhrase) dt.getDefiningCode();
+		CodePhrase cp = dt.getDefiningCode();
 		assertEquals("dvCodedText.definingCode.terminologyId wrong", "ISO_639-1", 
 				cp.getTerminologyId().getValue());
 		assertEquals("dvCodedText.value wrong", "sitting", 
@@ -258,7 +269,7 @@ public class DADLBindingTest extends DADLBindingTestBase {
 		Observation observation = (Observation) rmObj;
 		Event event = observation.getData().getEvents().get(0);
 		ItemList list = (ItemList) event.getData();
-		assertEquals("observatoin.events[0].data.items.size wrong", 2,
+		assertEquals("observation.events[0].data.items.size wrong", 2,
 				list.getItems().size());
 		DvQuantity dq = (DvQuantity) list.getItems().get(0).getValue();
 		assertEquals("items[0].value.magnitude wrong", 120.0, 
@@ -279,7 +290,7 @@ public class DADLBindingTest extends DADLBindingTestBase {
 		Observation observation = (Observation) rmObj;
 		Event event = observation.getData().getEvents().get(0);
 		ItemList list = (ItemList) event.getData();
-		assertEquals("observatoin.data.events[0].data.items.size wrong", 2,
+		assertEquals("observation.data.events[0].data.items.size wrong", 2,
 				list.getItems().size());
 		DvQuantity dq = (DvQuantity) list.getItems().get(0).getValue();
 		assertEquals("items[0].value.magnitude wrong", 120.0, 
@@ -298,9 +309,6 @@ public class DADLBindingTest extends DADLBindingTestBase {
 				"local", codedText.getDefiningCode().getTerminologyId().getValue());
 		assertEquals("event.state.items[0].value.definingCode.codeString wrong", 
 				"at1001", codedText.getDefiningCode().getCodeString());
-		
-		// test with paths
-		String path = "/data/events[0]/data/items[0]/value/magnitude";		
 	}
 	
 	public void testBindSimpleTypedItemTree() throws Exception {

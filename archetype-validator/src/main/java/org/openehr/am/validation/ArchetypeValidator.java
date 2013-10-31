@@ -15,7 +15,6 @@
 package org.openehr.am.validation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.openehr.am.archetype.Archetype;
 import org.openehr.am.archetype.assertion.Assertion;
 import org.openehr.am.archetype.assertion.ExpressionBinaryOperator;
@@ -86,6 +84,7 @@ import org.openehr.terminology.SimpleTerminologyService;
  * 
  * @version 1.0
  */
+@SuppressWarnings("SpellCheckingInspection")
 public class ArchetypeValidator {
 
     /**
@@ -93,15 +92,9 @@ public class ArchetypeValidator {
      */
     public ArchetypeValidator() {
         this.rmInspector = new RMInspector();
-
-        try {
-            this.termService = SimpleTerminologyService.getInstance();
-            this.openEHRTerminology  = termService.terminology(
-                    TerminologyService.OPENEHR);
-
-        } catch(Exception e) {
-            log.error("failed to start the terminology service", e);
-        }
+		TerminologyService termService = SimpleTerminologyService.getInstance();
+		this.openEHRTerminology  = termService.terminology(
+				TerminologyService.OPENEHR);
     }	
 
     private boolean reportConstraintsOnCommonFunctionalPropertiesAsInfo = false;
@@ -114,8 +107,7 @@ public class ArchetypeValidator {
     /**
      * Validates the given archetype 
      * 
-     * @param archetype
-     * @param reportConstraintsOnFunctionalPropertiesAsInfo if set to true, constraintson functional properties such as "is_integral" as part of DV_PROPORTION and "offset" in EVENT are reported as info only. If set to false (default), they are reported as errors.  
+     * @param reportConstraintsOnCommonFunctionalPropertiesAsInfo if set to true, constraintson functional properties such as "is_integral" as part of DV_PROPORTION and "offset" in EVENT are reported as info only. If set to false (default), they are reported as errors.  
      * @return list of validation errors or empty list if valid
      */
 
@@ -145,7 +137,6 @@ public class ArchetypeValidator {
     /**
      * Validates the given archetype 
      * 
-     * @param archetype
      * @return list of validation errors or empty list if valid
      */
     public List<ValidationError> validate(Archetype archetype) 
@@ -206,9 +197,6 @@ public class ArchetypeValidator {
 
     /**
      * Checks the archetype concept specialisation depth
-     * 
-     * @param archetype
-     * @param errors
      */
     public void checkConceptSpecializationDepth(Archetype archetype,
             List<ValidationError> errors) {
@@ -227,9 +215,6 @@ public class ArchetypeValidator {
      * Checks the validity of the archetype specialisation parent identifier, i.e.
      * that the archetype identifier stated in the specialise clause is the
      * identifier of the immediate specialisation parent archetype.
-     *    
-     * @param archetype
-     * @param errors
      */
     public void checkSpecializationParentIdentifierValidity(Archetype archetype,
             List<ValidationError> errors) {
@@ -258,26 +243,15 @@ public class ArchetypeValidator {
      * Checks ontology code specialisation level validity. No archetype code
      * (at-code or ac-code) defined in the ontology can be of a greater
      * specialisation depth than the archetype.
-     * 
-     * 
-     * @param archetype
-     * @param errors
      */
     public void checkOntologyCodeSpecialisationLevelValidity(
             Archetype archetype, List<ValidationError> errors) {
 
-        log.debug("validating ontology code specialisation of archetype: " + 
-                archetype.getArchetypeId());
-
         List<String> specialisation = archetype.getArchetypeId().specialisation();
-
-        log.debug("specialisation list: " + specialisation);
 
         int level = specialisation == null ? 0 : specialisation.size();
 
-        log.debug("specialisation level: " + level);
-
-        List<OntologyDefinitions> list = null;
+        List<OntologyDefinitions> list;
 
         list = archetype.getOntology().getTermDefinitionsList();
         checkOntologyDefinitions(list, errors, level);
@@ -289,7 +263,7 @@ public class ArchetypeValidator {
     private void checkOntologyDefinitions(List<OntologyDefinitions> defList,
             List<ValidationError> errors, int level) {
 
-        ValidationError error = null;
+        ValidationError error;
         for(OntologyDefinitions defs : defList) {
             for(ArchetypeTerm term : defs.getDefinitions()) {
                 if(hasGreaterSpecialisationLevel(term.getCode(), level)) {
@@ -311,10 +285,6 @@ public class ArchetypeValidator {
 
     /**
      * Checks various object constraints
-     * 
-     * @param archetype
-     * @param errors
-     * @throws RMInspectionException
      */
     public void checkObjectConstraints(Archetype archetype, 
             List<ValidationError> errors) throws RMInspectionException {
@@ -323,10 +293,6 @@ public class ArchetypeValidator {
 
 
     /** checks whether the rmAttrName is a commonly constrained functional property of the parentRMType
-     * 
-     * @param rmAttrName
-     * @param parentRMTypeName
-     * @return
      */
     private boolean isCommonFunctionalProperty(String rmAttrName, String parentRMTypeName) {
         if (rmAttrName.equals("is_integral") && parentRMTypeName.equals("DV_PROPORTION")) {
@@ -343,25 +309,25 @@ public class ArchetypeValidator {
 
     }
 
-    private void validateCAttribute(CAttribute cattr, 
+    @SuppressWarnings("ConstantConditions")
+	private void validateCAttribute(CAttribute cattr, 
             Map<String, Class> rmAttrs, CComplexObject parent,
             Archetype archetype, List<ValidationError> errors) 
                     throws RMInspectionException {
 
 
         String rmAttrName = cattr.getRmAttributeName();
-        Class rmAttrType = rmAttrs.get(rmAttrName);
+        Class<?> rmAttrType = rmAttrs.get(rmAttrName);
 
         Set<String> rmAttrNames = rmAttrs.keySet();
-        ValidationError error = null;
+        ValidationError error;
 
 
         String parentRmClassName = parent.getRmTypeName();
         parentRmClassName = removeGenericTypes(parentRmClassName);
         String parentGenericTypeName = getGenericType(parent.getRmTypeName());
-        log.debug("Generic type name: "+ parentGenericTypeName);
-        Class parentRmClass = rmInspector.retrieveRMType(parentRmClassName);
-        Class parentGenericType = null;
+        Class<?> parentRmClass = rmInspector.retrieveRMType(parentRmClassName);
+        Class<?> parentGenericType = null;
 
         if(parentGenericTypeName != null) {
             parentGenericType = rmInspector.retrieveRMType(parentGenericTypeName);
@@ -376,8 +342,6 @@ public class ArchetypeValidator {
             rmAttrType = Boolean.class;
         }
 
-        log.debug("1- validating attribute [" + rmAttrName + "] of type [" +
-                rmAttrType + "]");
         if( ! rmAttrNames.contains(rmAttrName)) {
             // if it is a commonly constrained functional property, only show this as information according to validator setting.
             if (reportConstraintsOnCommonFunctionalPropertiesAsInfo && isCommonFunctionalProperty(rmAttrName, parent.getRmTypeName())) {
@@ -413,11 +377,7 @@ public class ArchetypeValidator {
                 String childRMTypeName = cobj.getRmTypeName();
                 childRMTypeName = removeGenericTypes(childRMTypeName);
 
-                log.debug("2- validating attribute.child constraint of type: "
-                        + cobj.getClass() + ", with rmType: " +
-                        childRMTypeName);
-
-                Class childRMType =
+                Class<?> childRMType =
                         rmInspector.retrieveRMType(childRMTypeName);
 
                 if(childRMType == null) {
@@ -428,21 +388,12 @@ public class ArchetypeValidator {
 
                 } else if (cobj instanceof CPrimitiveObject) {
                     // need to check the assumed value for primitive objects before skipping if parentRMClass and childRMType are equal (which is the case for SOME, but not all primitive objects)                    
-                    log.debug("validating CPrimitiveObject at: "+ cobj.path());
-                    validateCPrimitiveObject((CPrimitiveObject) cobj, archetype, errors);
-                    log.debug("skipping unnecessary additional checks on " + parentRmClass);
+                    validateCPrimitiveObject((CPrimitiveObject) cobj, errors);
                     continue; // otherwise this is done twice
                 } else if( parentRmClass.equals(childRMType)){       
-                    
-                    log.debug("skipping unnecessary check on " + parentRmClass);
                     continue;
                 } else if(!rmAttrType.isEnum() 
                         && !(rmAttrType.isAssignableFrom(childRMType))){
-
-                    log.debug("3- rmAttrType: "+rmAttrType + " with name [" +
-                            rmAttrName+ "] is NOT assignable from type [" + 
-                            childRMType + "]");
-
                     ErrorType type = ErrorType.VCORMT;
                     if(cobj instanceof ArchetypeInternalRef) {
                         type = ErrorType.VUNT;
@@ -458,12 +409,6 @@ public class ArchetypeValidator {
                         && !(parentGenericType.isAssignableFrom(childRMType))) {
                     // the generic type is not assignable from the childRMType, e.g
                     // DV_INTERVAL<DV_TEXT> is wrong as DV_TEXT is a valid RMType, but not one that fits here: must be DV_ORDERED or subclass
-                    log.debug("4- rmAttrType: "+ rmAttrType + " of name [" +
-                            rmAttrName+ "] with generic type <" + 
-                            parentGenericTypeName + 
-                            "> is NOT assignable from type [" + 
-                            childRMType + "]");
-
                     ErrorType type = ErrorType.VCORMT;
                     if(cobj instanceof ArchetypeInternalRef) {
                         type = ErrorType.VUNT;
@@ -475,9 +420,6 @@ public class ArchetypeValidator {
                     continue;
 
                 } 
-
-                log.debug("5- rmAttrType: " + rmAttrType + " with name " +
-                        rmAttrName+ " IS assignable from "+ childRMType);					
 
                 // check csingle attribute child object occurrences					
                 Interval<Integer> occu = cobj.getOccurrences();
@@ -586,23 +528,17 @@ public class ArchetypeValidator {
             }
 
             if (cobj instanceof CDomainType) {
-                log.debug("validating CDomainType of node_id: "+ cobj.getNodeId());
-                validateCDomainType((CDomainType) cobj, archetype, errors);
+                validateCDomainType((CDomainType) cobj, errors);
             } else if (cobj instanceof CPrimitiveObject) {
-                log.debug("validating CPrimitiveObject at: "+ cobj.path());
-                validateCPrimitiveObject((CPrimitiveObject) cobj, archetype, errors);
+                validateCPrimitiveObject((CPrimitiveObject) cobj, errors);
             } else if(cobj instanceof CComplexObject) {
-                log.debug("validating ccobj at: "+ cobj.getNodeId());
                 validateCComplexObject((CComplexObject) cobj, archetype, errors);
-
             } else if(cobj instanceof ArchetypeInternalRef) {
-                log.debug("validating Internal Reference: "+ cobj.path());
                 checkArchetypeInternalRef((ArchetypeInternalRef) cobj, archetype, errors);
             } else if(cobj instanceof ArchetypeSlot) {
-                log.debug("validating ArchetypeSlot: "+ cobj.path());
-                checkArchetypeSlot((ArchetypeSlot) cobj, rmAttrType, archetype, errors);
+                checkArchetypeSlot((ArchetypeSlot) cobj, errors);
             } else {
-                log.debug("not continuing with recursion for class: "+ cobj.getClass());
+                // not continuing with recursion for class
             }
         }
     }
@@ -709,13 +645,9 @@ public class ArchetypeValidator {
 
 
     /** Checks the assertions of an archetype for validity
-     * @param cobj
-     * @param rmAttrType
-     * @param archetype
-     * @param errors
      */
-    private void checkArchetypeSlot(ArchetypeSlot slot, Class rmAttrType, Archetype archetype,
-            List<ValidationError> errors) {
+    private void checkArchetypeSlot(ArchetypeSlot slot,
+			List<ValidationError> errors) {
         if (slot.getIncludes() != null) {
             for (Assertion include : slot.getIncludes()) {
                 checkAssertionHasValidArchetypeIds(include, slot, errors);
@@ -729,10 +661,6 @@ public class ArchetypeValidator {
     }
 
     /** Checks that an assertion contains valid archetype ids 
-     * 
-     * @param assertion
-     * @param slot
-     * @param errors
      */
     private void checkAssertionHasValidArchetypeIds(Assertion assertion, ArchetypeSlot slot, List<ValidationError> errors) {
         if (assertion.getExpression() instanceof ExpressionBinaryOperator) {
@@ -747,7 +675,7 @@ public class ArchetypeValidator {
                         if (!pattern.equals(".*"))  {
                             // make readability modifications for the pattern
                             while (pattern.indexOf("(-[a-zA-Z0-9_]+)*\\") >0) {
-                                int i = pattern.indexOf("(-[a-zA-Z0-9_]+)*\\");
+                                //int i = pattern.indexOf("(-[a-zA-Z0-9_]+)*\\");
                                 pattern = pattern.replace("(-[a-zA-Z0-9_]+)*\\", "");
                                 // ignore any specialised syntax for now
                                 //pattern = pattern.substring(0,i+3) + " and specialisations"+ pattern.substring(i+3);
@@ -772,9 +700,6 @@ public class ArchetypeValidator {
     }
 
     /** Checks one archetype id to be a valid id or not
-     * @param slot
-     * @param errors
-     * @param oneId
      */
     private void checkOneArchetypeId(ArchetypeSlot slot, List<ValidationError> errors, String oneId) {
         // check for the right number of dots in the id
@@ -786,7 +711,6 @@ public class ArchetypeValidator {
             endsWithDotVNumber = false;
         } else {
             String tail = oneId.substring(oneId.lastIndexOf(".v")+2);
-            log.debug("tail: "+ tail);
             if (tail.length() == 0 || !StringUtils.isNumeric(tail)) {
                 endsWithDotVNumber = false;
             }
@@ -823,23 +747,19 @@ public class ArchetypeValidator {
      * Validates a given c_domain_type constraint
      * 
      * TODO: does not report a problem on values that have a higher precision than specified		
-     * 
-     * @param cobj
-     * @param archetype
-     * @param errors
      */	
-    private void validateCDomainType(CDomainType cdtobj, Archetype archetype, 
-            List<ValidationError> errors) {		
+    private void validateCDomainType(CDomainType cdtobj,
+			List<ValidationError> errors) {		
 
         if (cdtobj.hasAssumedValue()) {
-            log.debug("validating assumed value: " +cdtobj.getAssumedValue());
-            if (!cdtobj.validValue(cdtobj.getAssumedValue())) {
+			//noinspection unchecked
+			if (!cdtobj.validValue(cdtobj.getAssumedValue())) {
                 ValidationError error  = new ValidationError(ErrorType.VOBAV, null,
                         cdtobj.getAssumedValue(), cdtobj.getRmTypeName(), cdtobj.path());
                 errors.add(error);
             }
         } else { 
-            log.debug("No assumed value found for : "+cdtobj.getRmTypeName()+" at "+cdtobj.path());	
+            // No assumed value found
         }	
 
         if(cdtobj instanceof CCodePhrase) {
@@ -872,27 +792,21 @@ public class ArchetypeValidator {
         }
     }
 
-    /**
-     * @param cobj
-     * @param archetype
-     * @param errors
-     */
-    private void validateCPrimitiveObject(CPrimitiveObject cpobj, Archetype archetype, List<ValidationError> errors) {
+    private void validateCPrimitiveObject(CPrimitiveObject cpobj, List<ValidationError> errors) {
         // This finds VOBAV validation problems.
         CPrimitive item = cpobj.getItem();
         if (item.hasAssumedValue()) {
             Object assumedValue = item.assumedValue();
-            log.debug("Assumed value for CPrimitiveObject: "+assumedValue);
 
             if (!item.validValue(assumedValue)) {				
                 ValidationError error  = new ValidationError(ErrorType.VOBAV, null,
                         assumedValue, cpobj.getRmTypeName(), cpobj.path());
                 errors.add(error);
             } else {
-                log.debug("Found valid assumed value for CPrimitiveObject: "+cpobj.getRmTypeName()+" at "+cpobj.path());			
-            }
+                // Found valid assumed value for CPrimitiveObject
+			}
         } else { 
-            log.debug("No assumed value found for CPrimitiveObject : "+cpobj.getRmTypeName()+" at "+cpobj.path());	
+            // No assumed value found for CPrimitiveObject	
         }
     }
 
@@ -914,7 +828,7 @@ public class ArchetypeValidator {
         Map<String, Class> rmAttrs = rmInspector.retrieveRMAttributes(
                 rmTypeNameWithoutGeneric);
 
-        ValidationError error = null;
+        ValidationError error;
         if(rmAttrNames.isEmpty()) {
             error = new ValidationError(ErrorType.VCORM, null,
                     rmTypeNameWithoutGeneric, ccobj.path());
@@ -940,18 +854,13 @@ public class ArchetypeValidator {
 
     /** Checks that a generic type name actually exists. For example would generate an error for
      * DV_INTERVAL<COUNT>, which should really be DV_INTERVAL<DV_COUNT> 
-     * @param ccobj
-     * @param errors
      */
     private void checkGenericTypeName(CComplexObject ccobj, List<ValidationError> errors) {
         ValidationError error;
         String genericTypeName = getGenericType(ccobj.getRmTypeName());
-        log.debug("Generic type name: "+ genericTypeName);
-        Class genericType = null;
+        Class<?> genericType = null;
         if(genericTypeName != null) {
             genericType = rmInspector.retrieveRMType(genericTypeName);
-            log.debug("Generic type: "+ genericType);
-
         }
         if (genericTypeName != null && genericType == null){	
             error = new ValidationError(ErrorType.VCORM, null,
@@ -987,23 +896,15 @@ public class ArchetypeValidator {
 
     /**
      * Checks the given ArchetypeInternalRef
-     * 
-     * @param ref
-     * @param archetype
-     * @param errors
      */
     public void checkArchetypeInternalRef(ArchetypeInternalRef ref, 
-            /*Class rmAttributeType,*/ Archetype archetype,
+            /*Class<?> rmAttributeType,*/ Archetype archetype,
             List<ValidationError> errors) {
-
-
-        log.debug("validating internal_ref of rmType: " + ref.getRmTypeName() +
-                " at " +ref.path() + " with target " +ref.getTargetPath());
         //" for rmAttributeType: " + rmAttributeType);
 
         // right now unnecessary, should be checked already
-        Class rmType = rmInspector.retrieveRMType(ref.getRmTypeName());
-        ValidationError error = null;
+        Class<?> rmType = rmInspector.retrieveRMType(ref.getRmTypeName());
+        ValidationError error;
         if(rmType == null) {
             
             error = new ValidationError(ErrorType.VUNT, "UNKNOWN",
@@ -1018,35 +919,32 @@ public class ArchetypeValidator {
                      ref.getTargetPath(), ref.path());
             errors.add(error);
         } else {
-            Class targetType = rmInspector.retrieveRMType(target.getRmTypeName());
-            log.debug("Target type: "+targetType);
-            log.debug("rmtype: "+rmType);
+            Class<?> targetType = rmInspector.retrieveRMType(target.getRmTypeName());
             if(targetType == null) {
                 error = new ValidationError(ErrorType.VUNP, "UNKNOWNTARGETRM",
                         "Unknown target rm type at path: " + ref.getTargetPath() + 
                         " of internalRef at: " + ref.path());
                 errors.add(error);
-            } else if( ! rmType.isAssignableFrom(targetType)) {
-                error = new ValidationError(ErrorType.VUNP, "INVALIDTARGETRM",
-                      targetType, ref.path());
-                errors.add(error);
-            }			
-        }
+            } else if (rmType != null) {
+				if( ! rmType.isAssignableFrom(targetType)) {
+					error = new ValidationError(ErrorType.VUNP, "INVALIDTARGETRM",
+						  targetType, ref.path());
+					errors.add(error);
+				}
+			}
+		}
     }
 
     /**
      * Checks the archetype definition typename validity: The topmost typename mentioned
      * in the archetype definition section must match the type mentioned in the type-name
      * slot of the first segment of the archetype id.
-     * 
-     * @param archetype
-     * @param errors
      */
     public void checkArchetypeDefinitionTypename(Archetype archetype, 
             List<ValidationError> errors) {
         String conceptType = archetype.getArchetypeId().rmEntity();
         String topType = archetype.getDefinition().getRmTypeName();
-        ValidationError error = null;
+        ValidationError error;
         if( ! conceptType.equals(topType)) {
             error = new ValidationError(ErrorType.VARDT, null, topType, conceptType);
             errors.add(error);
@@ -1058,9 +956,6 @@ public class ArchetypeValidator {
      * term_definition and constraint_definition sections 
      * 
      * TODO: how about missing individual term_def/constraint_def translations?
-     * 
-     * @param archetype
-     * @return errors
      */
     public void checkOntologyTranslation(Archetype archetype,
             List<ValidationError> errors) {
@@ -1072,7 +967,7 @@ public class ArchetypeValidator {
                 archetype.getOntology().getConstraintDefinitionsList();
         Set<String> termDefLangs = retrieveLanguageSet(termDefList);
         Set<String> constraintDefLangs = retrieveLanguageSet(constraintDefList);
-        ValidationError error = null;
+        ValidationError error;
         for(String lang : languages) {
             if(primaryLang.equals(lang)) {
                 continue;
@@ -1100,51 +995,14 @@ public class ArchetypeValidator {
         return set;
     }
 
-    /**
-     * TODO not used
-     * 
-     * Check internal references
-     *
-     * @return map of node path, target path if any wrong internal references
-     */
-    Map<String, String> checkInternalReferences(Archetype archetype) {
-        Map<String, String> errors = new HashMap<String, String>();
-        return checkInternalReferences(archetype, archetype.getDefinition(),
-                errors);
-    }
-
-    private Map<String, String> checkInternalReferences(Archetype archetype,
-            CComplexObject ccobj,
-            Map<String, String> errors) {
-        for (CAttribute cattribute : ccobj.getAttributes()) {
-            for (CObject cobj : cattribute.getChildren()) {
-                if (cobj instanceof ArchetypeInternalRef) {
-                    ArchetypeInternalRef ref = (ArchetypeInternalRef) cobj;
-                    CObject target = (CObject)archetype.node(ref.getTargetPath());
-                    if (target == null
-                            || !target.getRmTypeName().equals(
-                                    cobj.getRmTypeName())) {
-                        // either target unknown or wrong type
-                        errors.put(ref.path(), ref.getTargetPath());
-                    }
-                }
-                if (cobj instanceof CComplexObject) {
-                    checkInternalReferences(archetype, (CComplexObject) cobj,
-                            errors);
-                }
-            }
-        }
-        return errors;
-    }
-
-    public void checkArchetypeTermValidity(Archetype archetype,
+	public void checkArchetypeTermValidity(Archetype archetype,
             List<ValidationError> errors) {
         Set<String> codes = fetchAllATCodes(archetype);    	
         String lang = archetype.getOriginalLanguage().getCodeString();
         List<OntologyDefinitions> defList = 
                 archetype.getOntology().getTermDefinitionsList();
         OntologyDefinitions priDefs = null;
-        ValidationError error = null;
+        ValidationError error;
 
         ArrayList<OntologyDefinitions> secondaryLanguageOntDefs = new ArrayList<OntologyDefinitions>();
         for(OntologyDefinitions defs : defList) {
@@ -1197,7 +1055,7 @@ public class ArchetypeValidator {
         }
 
         checkForUnusedCodes(defList, errors, archetype, codes);
-        checkForDoubleCodes(defList, errors, archetype);
+        checkForDoubleCodes(defList, errors);
 
     }
 
@@ -1208,7 +1066,7 @@ public class ArchetypeValidator {
         List<OntologyDefinitions> defList = 
                 archetype.getOntology().getConstraintDefinitionsList();
         OntologyDefinitions priDefs = null;
-        ValidationError error = null;
+        ValidationError error;
 
         ArrayList<OntologyDefinitions> secondaryLanguageOntDefs = new ArrayList<OntologyDefinitions>();
         for(OntologyDefinitions defs : defList) {
@@ -1261,16 +1119,12 @@ public class ArchetypeValidator {
 
 
         checkForUnusedCodes(defList, errors, archetype, codes);
-        checkForDoubleCodes(defList, errors, archetype);
+        checkForDoubleCodes(defList, errors);
     }	
 
 
 
     /** Checks for unused codes in the ontology
-     * 
-     * @param defList
-     * @param errors
-     * @param archetype
      */
     private void checkForUnusedCodes(List<OntologyDefinitions> defList,
             List<ValidationError> errors, Archetype archetype, Set<String> actuallyUsedCodes) {
@@ -1278,7 +1132,7 @@ public class ArchetypeValidator {
         int specialisationDepth = StringUtils.countMatches(archetype.getArchetypeId().domainConcept(), "-");
 
         // now check for each code if it exists in the definition
-        ValidationError error = null;
+        ValidationError error;
         for(OntologyDefinitions defs : defList) {
             for(ArchetypeTerm term : defs.getDefinitions()) {
                 if(! actuallyUsedCodes.contains(term.getCode())) {
@@ -1295,16 +1149,12 @@ public class ArchetypeValidator {
     }
 
     /** Checks for codes in the ontology that are there more than once
-     * 
-     * @param defList
-     * @param errors
-     * @param archetype
      */
     private void checkForDoubleCodes(List<OntologyDefinitions> defList,
-            List<ValidationError> errors, Archetype archetype) {
+			List<ValidationError> errors) {
 
         // now check for each code if it exists in the definition
-        ValidationError error = null;
+        ValidationError error;
         for(OntologyDefinitions defs : defList) {
             HashSet<String> foundCodes = new HashSet<String>();
             for(ArchetypeTerm term : defs.getDefinitions()) {
@@ -1325,7 +1175,7 @@ public class ArchetypeValidator {
             List<ValidationError> errors) {
 
         List<OntologyBinding> termBindings = archetype.getOntology().getTermBindingList();
-        ValidationError error = null;
+        ValidationError error;
         if (termBindings != null) {
             for (OntologyBinding binding : termBindings) {
                 for (OntologyBindingItem obi : binding.getBindingList()) {
@@ -1351,7 +1201,6 @@ public class ArchetypeValidator {
     /**
      * Traverse the archetype and gather all at codes
      * 
-     * @param archetype
      * @return a set of at codes
      */
     Set<String> fetchAllATCodes(Archetype archetype) {
@@ -1414,7 +1263,6 @@ public class ArchetypeValidator {
     /**
      * Traverse the archetype and gather all "ac" codes
      * 
-     * @param archetype
      * @return a set of at codes
      */
     Set<String> fetchAllACCodes(Archetype archetype) {
@@ -1459,8 +1307,6 @@ public class ArchetypeValidator {
     }
 
     /** Constructs a formal String for representing this Interval
-     * @param Interval
-     * @return
      */
     protected String getIntervalFormalString(Interval<Integer> interval) {
         Integer lower = interval.getLower();
@@ -1488,12 +1334,7 @@ public class ArchetypeValidator {
     /* Reference Model inspector */
     protected RMInspector rmInspector;
 
-    /* simple terminology service */
-    private TerminologyService termService;
-
-    private TerminologyAccess openEHRTerminology;
-
-    protected static final Logger log = Logger.getLogger(ArchetypeValidator.class);
+	private TerminologyAccess openEHRTerminology;
 }
 /*
  *  ***** BEGIN LICENSE BLOCK *****

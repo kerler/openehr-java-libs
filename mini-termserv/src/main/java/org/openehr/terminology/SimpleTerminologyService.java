@@ -14,7 +14,6 @@
 package org.openehr.terminology;
 
 import java.util.*;
-import org.apache.log4j.Logger;
 import org.openehr.rm.support.terminology.*;
 
 /**
@@ -32,9 +31,8 @@ public class SimpleTerminologyService implements TerminologyService {
 	 * Gets an instance of terminology service
 	 * 
 	 * @return terminology service
-	 * @throws Exception
 	 */
-	public static TerminologyService getInstance() throws Exception {
+	public static TerminologyService getInstance() {
 		return soleInstance;
 	}
 	
@@ -97,7 +95,6 @@ public class SimpleTerminologyService implements TerminologyService {
 			loadCodeSets(terminologySource);			
 			
 		} catch(Exception e) {
-			log.error("failed to initialize terminology service..", e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -135,10 +132,6 @@ public class SimpleTerminologyService implements TerminologyService {
 					codeset.externalId);
 		}
 	}
-	
-	/* static final field */
-	private static final Logger log = 
-		Logger.getLogger(SimpleTerminologyService.class);
 	
 	/* code sets indexed by external codeset name */
 	private Map<String, CodeSetAccess> codeSets;

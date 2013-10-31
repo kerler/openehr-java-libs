@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.openehr.am.archetype.Archetype;
 import org.openehr.am.archetype.constraintmodel.ArchetypeInternalRef;
 import org.openehr.am.archetype.constraintmodel.CAttribute;
@@ -188,7 +187,6 @@ public class SkeletonGenerator {
 			Map<String, Object> extraValues,
 			GenerationStrategy strategy) throws Exception {
 		String rmTypeName = ccobj.getRmTypeName();
-		log.debug("create complex object " + rmTypeName);
 
 		Map<String, Object> valueMap = new HashMap<String, Object>();
 		valueMap.put(TEMPLATE_ID, templateId);
@@ -490,12 +488,8 @@ public class SkeletonGenerator {
 			Map<String, Archetype> archetypeMap, Map<String, Object> extraValues,
 			GenerationStrategy strategy)
 			throws Exception {
-		log.debug("create attribute " + cattribute.getRmAttributeName());
-
 		List<CObject> children = cattribute.getChildren();
 		if (cattribute instanceof CSingleAttribute) {
-			log.debug("single attribute..");
-
 			if (children != null && children.size() > 0) {
 				// TODO first child is used for rm generation
 				CObject cobj = children.get(0);
@@ -504,8 +498,6 @@ public class SkeletonGenerator {
 				throw new Exception("no child object..");
 			}
 		} else { // multiple c_attribute
-			log.debug("multiple attribute..");
-
 			CMultipleAttribute cma = (CMultipleAttribute) cattribute;
 			Collection<Object> container;
 			if (cma.getCardinality().isList()) {
@@ -515,17 +507,12 @@ public class SkeletonGenerator {
 				container = new ArrayList<Object>();
 			}
 			for (CObject cobj : children) {
-				log.debug("looping children, required: " + cobj.isRequired());
-
 				// TODO only create 'required' child
 				if (cobj.isAllowed() &&
 						(GenerationStrategy.MAXIMUM.equals(strategy)
 								|| GenerationStrategy.MAXIMUM_EMPTY.equals(strategy)
 								|| (GenerationStrategy.MINIMUM.equals(strategy)
 								&& cobj.isRequired()))) {
-
-					log.debug("required child");
-
 					Object obj = createObject(cobj, archetype, archetypeMap,
 							extraValues, strategy);
 					if (obj != null) {
@@ -538,9 +525,6 @@ public class SkeletonGenerator {
 				//     EVENT[at0003] occurrences matches {0..*} matches {	
 				else if ("events".equals(cma.getRmAttributeName())
 						&& "EVENT".equals(cobj.getRmTypeName())) {
-
-					log.debug("mandatory events attribute fix");
-
 					container.add(createObject(cobj, archetype, archetypeMap,
 							extraValues, strategy));
 				}
@@ -548,8 +532,6 @@ public class SkeletonGenerator {
 
 			// TODO special rule to include first child
 			if (container.isEmpty()) {
-				log.debug("add first child for empty container attribute");
-
 				// disabled
 				// container.add(createObject(children.get(0), archetype));				
 				return null;
@@ -562,8 +544,6 @@ public class SkeletonGenerator {
 	public Object createObject(CObject cobj, Archetype archetype,
 			Map<String, Archetype> archetypeMap, Map<String, Object> extraValues,
 			GenerationStrategy strategy) throws Exception {
-		log.debug("create object with constraint " + cobj.getClass());
-
 		if (cobj instanceof CComplexObject) {
 			// no need for templateId at this level
 			return createComplexObject((CComplexObject) cobj,
@@ -834,8 +814,6 @@ public class SkeletonGenerator {
 
 	private static final DvCodedText NULL_FLAVOUR_VALUE = new DvCodedText(
 			"no information", new CodePhrase(TerminologyService.OPENEHR, "271"));
-
-	private static final Logger log = Logger.getLogger(SkeletonGenerator.class);
 
 	private RMObjectBuilder builder;
 	private TermMap termMap;

@@ -11,7 +11,7 @@ public class LoadTest extends DADLBindingTestBase {
 				rmObj instanceof Observation);
 	}
 	
-	public void testLoadBodyWegith() throws Exception {
+	public void testLoadBodyWeight() throws Exception {
 		rmObj = bind("body_weight.dadl");
 		assertNotNull("rmObject null", rmObj);
 		assertTrue("rmObject not Observation: "	+ rmObj.getClass().getName(), 

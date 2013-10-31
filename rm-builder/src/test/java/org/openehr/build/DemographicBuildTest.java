@@ -15,20 +15,36 @@
 
 package org.openehr.build;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.openehr.rm.RMObject;
-import org.openehr.rm.support.identification.*;
 import org.openehr.rm.common.archetyped.Archetyped;
 import org.openehr.rm.datastructure.DataStructure;
 import org.openehr.rm.datastructure.itemstructure.ItemStructure;
-import org.openehr.rm.datatypes.text.DvText;
-import org.openehr.rm.datatypes.quantity.datetime.DvDate;
 import org.openehr.rm.datatypes.quantity.DvInterval;
-import org.openehr.rm.demographic.*;
-
-import java.util.*;
+import org.openehr.rm.datatypes.quantity.datetime.DvDate;
+import org.openehr.rm.datatypes.text.DvText;
+import org.openehr.rm.demographic.Actor;
+import org.openehr.rm.demographic.Address;
+import org.openehr.rm.demographic.Agent;
+import org.openehr.rm.demographic.Capability;
+import org.openehr.rm.demographic.Contact;
+import org.openehr.rm.demographic.PartyIdentity;
+import org.openehr.rm.demographic.PartyRelationship;
+import org.openehr.rm.demographic.Role;
+import org.openehr.rm.support.identification.ArchetypeID;
+import org.openehr.rm.support.identification.HierObjectID;
+import org.openehr.rm.support.identification.ObjectID;
+import org.openehr.rm.support.identification.ObjectRef;
+import org.openehr.rm.support.identification.PartyRef;
 
 /**
- * Testcase for demographic object building
+ * Test case for demographic object building
  * 
  * @author Rong Chen
  * @version 1.0
@@ -39,7 +55,7 @@ public class DemographicBuildTest extends BuildTestBase {
 		String type = "Address";
 		Map<String, Object> values = new HashMap<String, Object>();
 
-		DvText text = text("addresss");
+		DvText text = text("address");
 		String node = "at0001";
 		DataStructure item = itemSingle("address details");
 		values.put("name", text);
@@ -49,10 +65,10 @@ public class DemographicBuildTest extends BuildTestBase {
 		RMObject obj = builder.construct(type, values);
 		assertTrue(obj instanceof Address);
 
-		Address addr = (Address) obj;
-		assertEquals("name wrong", text, addr.getName());
-		assertEquals("archetypeNodeId wrong", node, addr.getArchetypeNodeId());
-		assertEquals("details wrong", item, addr.getDetails());
+		Address address = (Address) obj;
+		assertEquals("name wrong", text, address.getName());
+		assertEquals("archetypeNodeId wrong", node, address.getArchetypeNodeId());
+		assertEquals("details wrong", item, address.getDetails());
 	}
 
 	public void testBuildPartyIdentity() throws Exception {
@@ -146,7 +162,7 @@ public class DemographicBuildTest extends BuildTestBase {
 
 		DvText text = text("Capability");
 		String node = "at0001";
-		DataStructure credentials = itemSingle("capbility credentials");
+		DataStructure credentials = itemSingle("capability credentials");
 		DvInterval<DvDate> timeValidity = new DvInterval<DvDate>(new DvDate(
 				"2001-10-30"), null);
 		values.put("name", text);

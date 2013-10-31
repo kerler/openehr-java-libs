@@ -18,7 +18,6 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.openehr.rm.datatypes.text.CodePhrase;
 
 /**
@@ -42,7 +41,7 @@ public class TermMap {
 	/**
 	 * Loads an in-memory termMap by given file 
 	 * 
-	 * @param input
+	 * @param filename
 	 * @return
 	 * @throws IOException
 	 */	
@@ -117,8 +116,6 @@ public class TermMap {
 			
 			if(totalTokens != 3 && totalTokens != 4) {
 		
-				log.debug("Wrong formatted line skipped: " + line);
-				
 				continue;
 			}
 			terminology = tokens.nextToken();
@@ -152,18 +149,10 @@ public class TermMap {
 	public void addTerm(String terminology, String code, String text,
 			String path) {
 		
-		if(log.isDebugEnabled()) {
-			log.debug("adding term: " + terminology + DELIMITER + code + 
-					DELIMITER + text + DELIMITER + path);
-		}
-		
 		Map<String,Map<String, String>> terms = termMap.get(terminology);
 		if( terms == null) {
 			terms = new TreeMap<String, Map<String, String>>();
 			termMap.put(terminology, terms);
-			
-			log.debug("new terminology: " + terminology + " added..");
-			
 		}
 		Map<String, String> paths = terms.get(code);
 		if( paths == null) {
@@ -207,9 +196,6 @@ public class TermMap {
 				}
 			}
 		}
-		
-		log.debug("Retrieved text '" + text + "' for [" + terminology + "::" 
-				+ code + "] at path: " + path);
 		
 		return text;
 	}
@@ -310,7 +296,6 @@ public class TermMap {
 
 	private static final String UTF8 = "UTF-8";
 	private static final String DELIMITER = "::";
-	private static final Logger log = Logger.getLogger(TermMap.class);
 	
 	// in-memory representation as [terminology, [code, [path, text]]
 	private Map<String, Map<String, Map<String, String>>> termMap;  

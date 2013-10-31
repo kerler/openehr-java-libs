@@ -19,7 +19,6 @@ import java.text.DateFormat;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 
 /**
  * A utility class to load path map generated in the template
@@ -41,7 +40,7 @@ public class PathMap {
 	/**
 	 * Loads an in-memory termMap by given file 
 	 * 
-	 * @param input
+	 * @param filename
 	 * @return
 	 * @throws IOException
 	 */	
@@ -96,7 +95,6 @@ public class PathMap {
 			}
 			i = line.indexOf(DELIMITER);
 			if(i <= 0) {
-				log.warn("Wrong formatted line skipped: " + line);				
 				continue;
 			}
 			key = line.substring(0, i).trim();
@@ -115,9 +113,6 @@ public class PathMap {
 			keyPathMap.put(key, path);
 			
 		} else if( ! path.equals(keyPathMap.get(key))) {
-			
-			log.warn("tried to add duplicated key [" + key + 
-					"] with different path: " + path);
 		}
 	}
 	
@@ -155,19 +150,13 @@ public class PathMap {
 			paths.add(key + DELIMITER + path);
 		}
 		
-		log.debug("max length of key: " + maxLen + ", key: " + maxLenKey);
-		
 		File pathMapFile = new File(filename);		
 		FileUtils.writeLines(pathMapFile, UTF8, paths);
-		
-		log.info("total " + (paths.size() - 1) + 
-				" line(s) of path written to file");
 	}
 	
 	private static final String UTF8 = "UTF-8";
 	private static final String DELIMITER = "=";
 	private Map<String,String> keyPathMap;
-	private Logger log = Logger.getLogger(PathMap.class);
 }
 /*
  * ***** BEGIN LICENSE BLOCK ***** Version: MPL 1.1/GPL 2.0/LGPL 2.1

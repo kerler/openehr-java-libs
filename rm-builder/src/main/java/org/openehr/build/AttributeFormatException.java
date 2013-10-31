@@ -26,6 +26,10 @@ public class AttributeFormatException extends RMObjectBuildingException {
     public AttributeFormatException(String msg) {
         super(msg, ErrorType.BAD_FORMAT);
     }
+
+	public AttributeFormatException(String message, Throwable cause) {
+		super(message, cause, ErrorType.BAD_FORMAT);
+	}
 }
 
 

@@ -5,6 +5,7 @@
  *
  * author:      "Rong Chen <rong.acode@gmail.com>"
  * copyright:   "Copyright (c) 2008-2010 Cambio Healthcare Systems, Sweden"
+ * copyright:   "Copyright (c) 2013 MEDvision360"
  * license:     "See notice at bottom of class"
  *
  * file:        "$URL$"
@@ -16,12 +17,14 @@ package org.openehr.binding;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlOptions;
 import org.openehr.build.RMObjectBuilder;
-import org.openehr.build.RMObjectBuildingException;
 import org.openehr.build.SystemValue;
 import org.openehr.rm.datatypes.quantity.ProportionKind;
 import org.openehr.rm.datatypes.text.CodePhrase;
@@ -37,46 +40,26 @@ import org.openehr.terminology.SimpleTerminologyService;
  * @author minor modifications by Erik Sundvall, Linköping University
  */
 public class XMLBinding {
-
-	/**
-	 * Constructor allowing use of a custom SystemValue Map
-	 */
-	public XMLBinding(Map<SystemValue, Object> values) throws XMLBindingException {	
-		try {
-			init(values);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("failed to start XMLBinding...");
+	public XMLBinding(Map<SystemValue, Object> values) {
+		if (values == null) {
+			throw new NullPointerException("values cannot be null");
 		}
+		init(values);
 	}
-		
-	/**
-	 * Default constructor starting the XML-binding using the following system values
-	 * <ul> 
-	 * 	<li> TERMINOLOGY_SERVICE = an instance of SimpleTerminologyService </li>
-	 * 	<li> MEASUREMENT_SERVICE = an instance of SimpleMeasurementService </li>
-	 * 	<li> TERMINOLOGY_SERVICE = an instance of CodePhrase("IANA_character-sets", "UTF-8"); </li>
-	 * </ul>
-	 */
-	public XMLBinding() throws XMLBindingException {
-		try {
-			TerminologyService termServ = SimpleTerminologyService
-					.getInstance();
-			MeasurementService measureServ = SimpleMeasurementService
-					.getInstance();
-			CodePhrase charset = new CodePhrase("IANA_character-sets",
-								"UTF-8");
 
-			Map<SystemValue, Object> values = new HashMap<SystemValue, Object>();
-			values.put(SystemValue.TERMINOLOGY_SERVICE, termServ);
-			values.put(SystemValue.MEASUREMENT_SERVICE, measureServ);
-			values.put(SystemValue.CHARSET, charset);						
-			init(values);
+	public XMLBinding() {
+		TerminologyService terminologyService = SimpleTerminologyService
+				.getInstance();
+		MeasurementService measurementService = SimpleMeasurementService
+				.getInstance();
+		CodePhrase charset = new CodePhrase("IANA_character-sets",
+				"UTF-8");
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("failed to start XMLBinding..");
-		}
+		Map<SystemValue, Object> values = new HashMap<SystemValue, Object>();
+		values.put(SystemValue.TERMINOLOGY_SERVICE, terminologyService);
+		values.put(SystemValue.MEASUREMENT_SERVICE, measurementService);
+		values.put(SystemValue.CHARSET, charset);
+		init(values);
 	}
 
 	public Object bindToXML(Object obj) throws XMLBindingException {
@@ -85,41 +68,37 @@ public class XMLBinding {
 
 	/**
 	 * Binds data from reference model instance to XML binding classes
-	 *
-	 * @param obj
-	 * @param asDocument
-	 * @return
-	 * @throws XMLBindingException
 	 */
+	@SuppressWarnings("ConstantConditions")
 	public Object bindToXML(Object obj, boolean asDocument) throws XMLBindingException {
-		if(obj == null) {
+		if (obj == null) {
 			return null;
 		}
 		String className = obj.getClass().getSimpleName();
 		Method[] methods = obj.getClass().getMethods();
 
 		try {
-			Class xmlClass = null;
+			Class<?> xmlClass = null;
 			Object xmlObj = null;
-			
+
 			if (asDocument) {
 				// when serializing back to XML strings, XMLBeans needs a Document wrapper to be able to write a 
 				// proper root element. If it doesn't have one, it will output an <xml-fragment/>
-				Class factoryClass;
+				Class<?> factoryClass;
 				try {
 					factoryClass = Class.forName(XML_BINDING_PACKAGE +
-				 					className + "Document$Factory");
+							className + "Document$Factory");
 				} catch (ClassNotFoundException e) {
 					factoryClass = Class.forName(XML_BINDING_PACKAGE +
-				 					className.toUpperCase() + "Document$Factory");
-                } catch (NoClassDefFoundError e) {
-                    factoryClass = Class.forName(XML_BINDING_PACKAGE +
-                                    className.toUpperCase() + "Document$Factory");
+							className.toUpperCase() + "Document$Factory");
+				} catch (NoClassDefFoundError e) {
+					factoryClass = Class.forName(XML_BINDING_PACKAGE +
+							className.toUpperCase() + "Document$Factory");
 				}
 
 				Method factoryMethod = factoryClass.getMethod(NEW_INSTANCE, XmlOptions.class);
-				Object documentObj = factoryMethod.invoke(null, xopt);
-				Class documentClass = documentObj.getClass();
+				Object documentObj = factoryMethod.invoke(null, xmlOptions);
+				Class<?> documentClass = documentObj.getClass();
 				Method[] documentMethods = documentClass.getMethods();
 				boolean found = false;
 				for (int i = 0; i < documentMethods.length; i++) {
@@ -136,69 +115,41 @@ public class XMLBinding {
 				}
 			} else {
 				xmlClass = Class.forName(XML_BINDING_PACKAGE +
-								className.toUpperCase());
+						className.toUpperCase());
 
-				// debug code only
-				if(xmlClass.getClasses().length != 1) {
-					log.debug("XMLBinding: bindToXML(): xmlClass.getClass()=" + xmlClass.getClass());
-					log.debug("XMLBinding: bindToXML(): xmlClass.toString()=" + xmlClass.toString());
-					for(Class clazz : xmlClass.getClasses()) {
-						log.debug("\t clazz.getClass()=" + clazz.getClass());
-						log.debug("\t clazz.toString()=" + clazz.toString());
-					}
-				}
-
-				Class factoryClass = xmlClass.getClasses()[0];
-		
-				// ES modification: Add xmlOptions containing openehr (default) and xsi namespaces
-				
-				// Method factoryMethod = factoryClass.getMethod(NEW_INSTANCE, null);
-				// Changed to pick the method with an XmlOptions parameter instead
+				Class<?> factoryClass = xmlClass.getClasses()[0];
 				Method factoryMethod = factoryClass.getMethod(NEW_INSTANCE, XmlOptions.class);
-				
-				// First prameter null because it's a static method, see:
-				// http://java.sun.com/docs/books/tutorial/reflect/member/methodInvocation.html
-				// Second parameter should be the parameter of XmlObject.Factory.newInstance(XmlOptions options) 
-				// see: http://xmlbeans.apache.org/docs/2.2.0/reference/org/apache/xmlbeans/XmlObject.Factory.html
-				//
-				// Previous code was: Object xmlObj = factoryMethod.invoke(null, null);
-				xmlObj = factoryMethod.invoke(null, xopt);
+				xmlObj = factoryMethod.invoke(null, xmlOptions);
 			}
 
-			Map<String, Class> attributes = builder.retrieveAttribute(className);
+			Map<String, Class<?>> attributes = builder.retrieveAttribute(className);
 			Set<String> attributeNames = attributes.keySet();
-			Object attributeValue = null;
-			Method setterMethod = null;
+			Object attributeValue;
+			Method setterMethod;
 
 			for (Method method : methods) {
 				String name = method.getName();
 
 				// cause dead-loop
-				if("getParent".equals(name)) {
+				if ("getParent".equals(name)) {
 					continue; //
 				}
 
 				if (isGetter(name, attributeNames)) {
-
-					log.debug("getter: " + name);
-
-					if(method.getParameterTypes().length > 0) {
+					if (method.getParameterTypes().length > 0) {
 						continue;
 					}
 
 					attributeValue = method.invoke(obj, null);
-
 					if (attributeValue == null) {
 						continue;
 					}
-
-					log.debug("value.class: " + attributeValue.getClass());
 
 					boolean isList = false;
 
 					if (attributeValue.getClass().isArray()) {
 						Object[] array = (Object[]) attributeValue;
-						if(array.length == 0) {
+						if (array.length == 0) {
 							continue;
 						}
 						Object[] done = new Object[array.length];
@@ -206,86 +157,59 @@ public class XMLBinding {
 							done[i] = bindToXML(array[i]);
 						}
 						attributeValue = done;
-
 					} else if (ProportionKind.class.equals(
 							attributeValue.getClass())) {
-
 						ProportionKind kind = (ProportionKind) attributeValue;
 						attributeValue = BigInteger.valueOf(kind.getValue());
-
-					} else if (isOpenEHRRMClass(attributeValue)) {
-
+					} else if (builder.isOpenEHRRMClass(attributeValue)) {
 						attributeValue = bindToXML(attributeValue);
-
-					} else if(List.class.isAssignableFrom(
+					} else if (List.class.isAssignableFrom(
 							attributeValue.getClass())) {
-
 						isList = true;
 						List list = (List) attributeValue;
-
-						log.debug("list.size: " + list.size());
 
 						String attributeName = getAttributeNameFromGetter(name);
 						setterMethod = findSetter(attributeName, xmlClass, isList);
 
 						Method addNew = findAddNew(attributeName, xmlClass);
 
-						log.debug("setter: " + setterMethod.getName() + ", xmlClass: " + xmlClass);
-
-						for(int i = 0, j = list.size() - 1; i <= j; i++) {
+						for (int i = 0, j = list.size() - 1; i <= j; i++) {
 							Object value = list.get(i);
-
 							Object[] array = new Object[2];
-
 							addNew.invoke(xmlObj, null);
-
 							array[0] = new Integer(i);
 							array[1] = bindToXML(value);
 							setterMethod.invoke(xmlObj, array);
-
-							log.debug("list.member value set!!!!");
 						}
 					}
 
-					if( ! isList) {
+					if (!isList) {
 						String attributeName = getAttributeNameFromGetter(name);
 
-						log.debug("attribute: " + attributeName + ", value(" + attributeValue + "), " +
-								"type: " + attributeValue.getClass());
-
-						// TODO fix for mismatched attribute name in XSD and RM 
-						if("nullFlavor".equals(attributeName)) {
+						if ("nullFlavor".equals(attributeName)) {
 							attributeName = "nullFlavour";
 						}
-						
+
 						// skip function according to specs
-						if("isMerged".equals(attributeName)) {
+						if ("isMerged".equals(attributeName)) {
 							continue;
 						}
-						
-						setterMethod = findSetter(attributeName, xmlClass, isList);
 
-						if(setterMethod == null) {
-							log.error("failed to find setterMethod for attribute: "
-									+ attributeName + " with type: " + xmlClass);
+						setterMethod = findSetter(attributeName, xmlClass, isList);
+						if (setterMethod == null) {
 							continue;
 						}
 
 						// special handling deals with 'real' typed
 						// attributes in specs but typed 'float' in xsd
 						String setter = setterMethod.getName();
-						if("setAccuracy".equals(setter)
+						if ("setAccuracy".equals(setter)
 								|| "setDenominator".equals(setter)
 								|| "setNumerator".equals(setter)) {
 
 							Double d = (Double) attributeValue;
 							attributeValue = d.floatValue();
 						}
-						
-						log.debug("setter: " + setterMethod.getName() +
-								", xmlClass: " + xmlClass +
-								", attributeValue: " + attributeValue +
-								", attributeValue.class: " + attributeValue.getClass());
 
 						setterMethod.invoke(xmlObj, attributeValue);
 					}
@@ -293,80 +217,15 @@ public class XMLBinding {
 			}
 
 			return xmlObj;
-
-		} catch(Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			throw new XMLBindingException("exception caught when bind obj to "
-					+ className + ", " +  e.getMessage());
+					+ className + ", " + e.getMessage(), e);
 		}
 	}
 
-	Method findSetter(String attributeName, Class xmlClass, boolean isList) {
-		Method[] methods = xmlClass.getMethods();
-		String name = "set" + attributeName.substring(0, 1).toUpperCase() +
-						attributeName.substring(1);
-
-		if(isList) {
-			name += "Array";
-		}
-
-		log.debug("search method of name '" + name + "'");
-
-		for(Method method : methods) {
-			if(method.getName().equals(name)) {
-				Type[] paras = method.getParameterTypes();
-				if(isList) {
-					if(paras.length == 2) {
-						return method;
-					}
-				} else if(paras.length == 1) {
-					return method;
-				}
-			}
-		}
-		return null;
-	}
-
-	Method findAddNew(String attributeName, Class xmlClass) {
-		Method[] methods = xmlClass.getMethods();
-		String name = "addNew" + attributeName.substring(0, 1).toUpperCase() +
-						attributeName.substring(1);
-
-		log.debug("search method of name '" + name + "'");
-
-		for(Method method : methods) {
-			if(method.getName().equals(name)) {
-				return method;
-			}
-		}
-		return null;
-	}
-
-	Class findXMLAbstractClass(Class xmlClass) throws ClassNotFoundException {
-
-		if( ! xmlClass.getName().contains(XML_BINDING_PACKAGE)) {
-			return xmlClass; // primitive class
-		}
-
-		String className = xmlClass.getSimpleName();
-		if (className.endsWith("Impl")) {
-			className = className.substring(0, className.length() - 4);
-		}
-		Class abstractClass = Class.forName(XML_BINDING_PACKAGE  + className);
-		return abstractClass;
-	}
-
-
-	/**
-	 * Binds data from XML binding classes to RM classes using reflection
-	 *
-	 * @param value
-	 * @return
-	 * @throws Exception
-	 */
 	public Object bindToRM(Object object) throws Exception {
 		Method[] methods = object.getClass().getMethods();
-		Object value = null;
+		Object value;
 		Map<String, Object> valueMap = new HashMap<String, Object>();
 
 		String className = object.getClass().getSimpleName();
@@ -374,47 +233,33 @@ public class XMLBinding {
 			className = className.substring(0, className.length() - 4);
 		}
 
-		Map<String, Class> attributes = builder.retrieveAttribute(className);
+		Map<String, Class<?>> attributes = builder.retrieveAttribute(className);
 		Set<String> attributeNames = attributes.keySet();
-
-		log.debug("attributeNames: " + attributeNames);
 
 		for (Method method : methods) {
 			String name = method.getName();
-			
+
 			if (isGetter(name, attributeNames)) {
-				
-				if(method.getParameterTypes().length > 0) {
+				if (method.getParameterTypes().length > 0) {
 					continue;
 				}
 
 				String attribute = getAttributeNameFromGetter(name);
-				
-				value = method.invoke(object, null);
 
-				log.info("getter: " + name + ", attribute: " + attribute +
-						", value: " + value);
-				
+				value = method.invoke(object, null);
 				if (value == null) {
-					
 					continue;
 				}
 
-				log.debug("value.class: " + value.getClass() + ", "
-						+ isXMLBindingClass(value));
-
 				if (value.getClass().isArray()) {
 					Object[] array = (Object[]) value;
-					if(array.length == 0) {
-						
+					if (array.length == 0) {
 						// special fix for item_structure.items
-						if("items".equals(attribute)) {
+						if ("items".equals(attribute)) {
 							valueMap.put(attribute, new ArrayList());
 						}
 						continue;
-						
 					} else {
-					
 						Object[] done = new Object[array.length];
 						for (int i = 0; i < array.length; i++) {
 							done[i] = bindToRM(array[i]);
@@ -423,31 +268,54 @@ public class XMLBinding {
 					}
 
 				} else if (isXMLBindingClass(value)) {
-
 					value = bindToRM(value);
-
 				}
-				
-				log.debug("attribute: " + attribute + ", value(" + value + ")");
-				
 				valueMap.put(attribute, value);
 			}
 		}
 
-		log.info("building rm class: " + className
-				+ ", with valueMap: " + valueMap);
-
-		Object rmObj = null;
-
-		rmObj = builder.construct(className, valueMap);
-
+		Object rmObj = builder.construct(className, valueMap);
 		return rmObj;
 	}
 
+	protected Method findSetter(String attributeName, Class<?> xmlClass, boolean isList) {
+		Method[] methods = xmlClass.getMethods();
+		String name = "set" + attributeName.substring(0, 1).toUpperCase() +
+				attributeName.substring(1);
 
+		if (isList) {
+			name += "Array";
+		}
 
-	/* checks if the given method is a known getter of attributes */
-	private boolean isGetter(String method, Set<String> attributes) {
+		for (Method method : methods) {
+			if (method.getName().equals(name)) {
+				Type[] paras = method.getParameterTypes();
+				if (isList) {
+					if (paras.length == 2) {
+						return method;
+					}
+				} else if (paras.length == 1) {
+					return method;
+				}
+			}
+		}
+		return null;
+	}
+
+	protected Method findAddNew(String attributeName, Class<?> xmlClass) {
+		Method[] methods = xmlClass.getMethods();
+		String name = "addNew" + attributeName.substring(0, 1).toUpperCase() +
+				attributeName.substring(1);
+
+		for (Method method : methods) {
+			if (method.getName().equals(name)) {
+				return method;
+			}
+		}
+		return null;
+	}
+
+	protected boolean isGetter(String method, Set<String> attributes) {
 		if (!method.startsWith("get")) {
 			return false;
 		}
@@ -455,66 +323,44 @@ public class XMLBinding {
 		return attributes.contains(name);
 	}
 
-	/* turns a getter's name into an attribute name */
-	private String getAttributeNameFromGetter(String name) {
+	protected String getAttributeNameFromGetter(String name) {
 		name = name.substring(3, name.length());
 		name = name.substring(0, 1).toLowerCase() + name.substring(1);
-		if(name.endsWith("Array")) {
+		if (name.endsWith("Array")) {
 			name = name.substring(0, name.length() - 5);
 		}
 		return name;
 	}
 
-	private boolean isXMLBindingClass(Object obj) {
+	protected boolean isXMLBindingClass(Object obj) {
 		return obj.getClass().getName().contains(XML_BINDING_PACKAGE);
 	}
 
-	private boolean isOpenEHRRMClass(Object obj) {
-		return obj.getClass().getName().contains(OPENEHR_RM_PACKAGE);
-	}
-	
+	protected void init(Map<SystemValue, Object> values) {
+		xmlOptions = new XmlOptions();
 
-	protected void init(Map<SystemValue, Object> values) throws XMLBindingException{
-			
-		// Set up xml defaults
-		xopt = new XmlOptions();
-		
 		HashMap<String, String> uriToPrefixMap = new HashMap<String, String>();
 		uriToPrefixMap.put(SCHEMA_XSI, "xsi");
-	    uriToPrefixMap.put(SCHEMA_OPENEHR_ORG_V1, "v1");
-		xopt.setSaveSuggestedPrefixes(uriToPrefixMap);
-	
-		xopt.setSaveAggressiveNamespaces();
-		xopt.setSavePrettyPrint(); 
-		xopt.setCharacterEncoding("UTF-8");
-		
-		try {
-			builder = new RMObjectBuilder(values);
-		} catch (Exception e) {
-			throw new RuntimeException("failed to start XMLBinding...", e);
-		}		
-	}
+		uriToPrefixMap.put(SCHEMA_OPENEHR_ORG_V1, "v1");
+		xmlOptions.setSaveSuggestedPrefixes(uriToPrefixMap);
 
-	/* logger */
-	private static Logger log = Logger.getLogger(XMLBinding.class);
+		xmlOptions.setSaveAggressiveNamespaces();
+		xmlOptions.setSavePrettyPrint();
+		xmlOptions.setCharacterEncoding("UTF-8");
+
+		builder = new RMObjectBuilder(values);
+	}
 
 	/* namespace for generated binding class */
 	private static String XML_BINDING_PACKAGE = "org.openehr.schemas.v1.";
 
-	/* namespace for rm class */
-	private static String OPENEHR_RM_PACKAGE = "org.openehr.rm.";
+	private static final String NEW_INSTANCE = "newInstance";
 
-	/* factory method name */
-	private static String NEW_INSTANCE = "newInstance";
-	
 	public static final String SCHEMA_XSI = "http://www.w3.org/2001/XMLSchema-instance";
 	public static final String SCHEMA_OPENEHR_ORG_V1 = "http://schemas.openehr.org/v1";
 
-	/* the builder used to create rm objects */
 	private RMObjectBuilder builder;
-	
-	/* ES: XMLOptions to make nicer XML */
-	private XmlOptions xopt;
+	private XmlOptions xmlOptions;
 }
 /*
  * ***** BEGIN LICENSE BLOCK ***** Version: MPL 1.1/GPL 2.0/LGPL 2.1

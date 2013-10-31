@@ -10,7 +10,6 @@ import java.util.Map;
 import openEHR.v1.template.TEMPLATE;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.openehr.am.archetype.Archetype;
 import org.openehr.am.archetype.constraintmodel.ArchetypeConstraint;
 import org.openehr.am.archetype.constraintmodel.CAttribute;
@@ -387,7 +386,6 @@ public class TemplateTestBase extends TestCase {
 	 * with c_string item, then return c_string for further inspection
 	 * 
 	 * @param ac
-	 * @param onlyValue
 	 */
 	protected CString assertCString(ArchetypeConstraint ac) {
 		assertNotNull("null instead of CPrimitiveObject", ac);
@@ -647,6 +645,4 @@ public class TemplateTestBase extends TestCase {
 	protected Archetype flattened;
 	protected Archetype archetype;
 	protected Archetype expected;
-	
-	private static final Logger log = Logger.getLogger(TemplateTestBase.class);
 }

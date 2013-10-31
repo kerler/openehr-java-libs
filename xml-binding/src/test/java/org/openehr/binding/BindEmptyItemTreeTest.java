@@ -1,8 +1,9 @@
 package org.openehr.binding;
 
 import org.openehr.rm.datastructure.itemstructure.ItemTree;
-import org.openehr.schemas.v1.*;
+import org.openehr.schemas.v1.ITEMTREE;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class BindEmptyItemTreeTest extends XMLBindingTestBase {
 	
 	public void testBindXMLDvProportionToRM() throws Exception {

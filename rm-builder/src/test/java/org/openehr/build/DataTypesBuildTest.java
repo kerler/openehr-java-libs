@@ -15,7 +15,10 @@
 
 package org.openehr.build;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.openehr.rm.RMObject;
 import org.openehr.rm.datatypes.basic.DvBoolean;
@@ -181,7 +184,7 @@ public class DataTypesBuildTest extends BuildTestBase {
         values.put("units", "mg");
         values.put("magnitude", "wrong type");
         try {
-            obj = builder.construct(type, values);
+            builder.construct(type, values);
             fail("attribute format exception should be thrown here");
         } catch (Exception e) {
             assertTrue(e instanceof AttributeFormatException);
@@ -208,7 +211,7 @@ public class DataTypesBuildTest extends BuildTestBase {
         values.clear();
         values.put("value", "bad values");
         try {
-            obj = builder.construct(type, values);
+            builder.construct(type, values);
             fail("attribute format exception should be thrown here");
         } catch (Exception e) {
             assertTrue(e instanceof AttributeFormatException);
@@ -217,7 +220,7 @@ public class DataTypesBuildTest extends BuildTestBase {
         // with missing required value
         values.clear();
         try {
-            obj = builder.construct(type, values);
+            builder.construct(type, values);
             fail("attribute missing exception should be thrown here");
         } catch (Exception e) {
             assertTrue(e instanceof AttributeMissingException);

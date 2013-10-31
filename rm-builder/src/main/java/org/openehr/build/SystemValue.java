@@ -14,7 +14,8 @@
  */
 package org.openehr.build;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Enumeration of values that are supplied by the system
@@ -68,7 +69,6 @@ public enum SystemValue {
     /**
      * Return system value with matching id
      *
-     * @param id
      * @return null if not found
      */
     public static SystemValue fromId(String id) {

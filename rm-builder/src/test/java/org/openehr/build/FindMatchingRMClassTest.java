@@ -13,8 +13,12 @@
  */
 package org.openehr.build;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import junit.framework.TestCase;
 import org.openehr.rm.common.archetyped.Archetyped;
 import org.openehr.rm.common.generic.PartySelf;
 import org.openehr.rm.datastructure.history.Event;
@@ -30,36 +34,31 @@ import org.openehr.rm.support.identification.ArchetypeID;
 import org.openehr.rm.support.identification.TerminologyID;
 import org.openehr.rm.support.measurement.MeasurementService;
 import org.openehr.rm.support.measurement.SimpleMeasurementService;
-import org.openehr.rm.support.terminology.TerminologyService;
-import org.openehr.terminology.SimpleTerminologyService;
-
-import junit.framework.TestCase;
 
 public class FindMatchingRMClassTest extends TestCase {
 	
 	public FindMatchingRMClassTest() throws Exception {
 		builder = new RMObjectBuilder();
 		ms =  SimpleMeasurementService.getInstance();
-		ts = SimpleTerminologyService.getInstance();
 	}
 	
 	public void setUp() {
 		valueMap = new HashMap<String, Object>();
 	}
 	
-	public void testMatchDvQuantityValues() {
+	public void testMatchDvQuantityValues() throws Exception {
 		valueMap.put("units", "mmHg");
 		valueMap.put("magnitude", 120.0);
 		assertMatchedRMClass("DvQuantity");
 	}
 	
-	public void testMatchCodePhrase() {
+	public void testMatchCodePhrase() throws Exception {
 		valueMap.put("terminologyId", new TerminologyID("openehr"));
 		valueMap.put("codeString", "234");
 		assertMatchedRMClass("CodePhrase");
 	}
 	
-	public void testMatchElement() {
+	public void testMatchElement() throws Exception {
 		DvText name = new DvText("name");
 		DvQuantity value = new DvQuantity("mmHg", 120.0, ms);
 		valueMap.put("archetypeNodeId", "at0001");
@@ -68,7 +67,7 @@ public class FindMatchingRMClassTest extends TestCase {
 		assertMatchedRMClass("Element");
 	}
 	
-	public void testWithUnderscoreSeparatedAttributeName() {
+	public void testWithUnderscoreSeparatedAttributeName() throws Exception {
 		DvText name = new DvText("name");
 		DvQuantity value = new DvQuantity("mmHg", 120.0, ms);
 		valueMap.put("archetype_node_id", "at0001");
@@ -77,7 +76,7 @@ public class FindMatchingRMClassTest extends TestCase {
 		assertMatchedRMClass("Element");
 	}
 	
-	public void testMatchItemList() {
+	public void testMatchItemList() throws Exception {
 		DvText name = new DvText("BP measurement");
 		DvQuantity systolicValue = new DvQuantity("mmHg", 120.0, ms);
 		DvQuantity diastolicValue = new DvQuantity("mmHg", 80.0, ms);
@@ -94,7 +93,7 @@ public class FindMatchingRMClassTest extends TestCase {
 		assertMatchedRMClass("ItemList");
 	}
 	
-	public void testMatchPointEvent() {
+	public void testMatchPointEvent() throws Exception {
 		DvQuantity systolicValue = new DvQuantity("mmHg", 120.0, ms);
 		Element systolicElement = new Element("at0001", 
 				new DvText("systolic"), systolicValue);
@@ -108,14 +107,14 @@ public class FindMatchingRMClassTest extends TestCase {
 		assertMatchedRMClass("PointEvent");
 	}
 	
-	public void testMatchingHistory() {
+	public void testMatchingHistory() throws Exception {
 		DvQuantity systolicValue = new DvQuantity("mmHg", 120.0, ms);
 		Element systolicElement = new Element("at0001", 
 				new DvText("systolic"), systolicValue);
 		List<Element> items = new ArrayList<Element>();
 		items.add(systolicElement);
 		ItemList itemList = new ItemList("at0003", new DvText("list"), items);
-		PointEvent event = new PointEvent("at0004", new DvText("event"),
+		PointEvent event = new PointEvent<ItemList>("at0004", new DvText("event"),
 				new DvDateTime("2005-12-03T09:22:00"), itemList);
 		List<Event> events = new ArrayList<Event>();
 		events.add(event);
@@ -127,18 +126,18 @@ public class FindMatchingRMClassTest extends TestCase {
 		assertMatchedRMClass("History");
 	}
 	
-	public void testMatchObservation() {
+	public void testMatchObservation() throws Exception {
 		DvQuantity systolicValue = new DvQuantity("mmHg", 120.0, ms);
 		Element systolicElement = new Element("at0001", 
 				new DvText("systolic"), systolicValue);
 		List<Element> items = new ArrayList<Element>();
 		items.add(systolicElement);
 		ItemList itemList = new ItemList("at0003", new DvText("list"), items);
-		PointEvent event = new PointEvent("at0004", new DvText("event"),
+		PointEvent<ItemList> event = new PointEvent<ItemList>("at0004", new DvText("event"),
 				new DvDateTime("2005-12-03T09:22:00"), itemList);
-		List<Event> events = new ArrayList<Event>();
+		List<Event<ItemList>> events = new ArrayList<Event<ItemList>>();
 		events.add(event);
-		History<ItemList> history = new History("at0005", new DvText("history"),
+		History<ItemList> history = new History<ItemList>("at0005", new DvText("history"),
 				new DvDateTime("2005-12-03T09:22:00"), events);
 		CodePhrase language = new CodePhrase("ISO_639-1", "en");
 	    CodePhrase encoding = new CodePhrase("IANA_character-sets", "UTF-8");
@@ -161,7 +160,7 @@ public class FindMatchingRMClassTest extends TestCase {
 		assertMatchedRMClass("Archetyped");
 	}
 	
-	private void assertMatchedRMClass(String expectedRMClass) {
+	private void assertMatchedRMClass(String expectedRMClass) throws Exception {
 		String actualRMClass = builder.findMatchingRMClass(valueMap);
 		assertEquals("failed to match " + expectedRMClass, expectedRMClass,
 				actualRMClass);
@@ -170,7 +169,6 @@ public class FindMatchingRMClassTest extends TestCase {
 	private Map<String, Object> valueMap;
 	private RMObjectBuilder builder;
 	private MeasurementService ms;
-	private TerminologyService ts;
 }
 /*
  *  ***** BEGIN LICENSE BLOCK *****

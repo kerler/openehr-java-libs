@@ -13,22 +13,32 @@
  */
 package org.openehr.binding;
 
-import java.io.*;
+import java.io.InputStream;
 
-import org.openehr.rm.datastructure.itemstructure.ItemTree;
-import org.openehr.schemas.v1.*;
 import junit.framework.TestCase;
+import org.openehr.schemas.v1.COMPOSITION;
+import org.openehr.schemas.v1.CompositionDocument;
+import org.openehr.schemas.v1.DVQUANTITY;
+import org.openehr.schemas.v1.ELEMENT;
+import org.openehr.schemas.v1.ITEMTREE;
+import org.openehr.schemas.v1.ItemsDocument;
+import org.openehr.schemas.v1.OBSERVATION;
+import org.openehr.schemas.v1.ORIGINALVERSION;
+import org.openehr.schemas.v1.SECTION;
+import org.openehr.schemas.v1.VERSION;
+import org.openehr.schemas.v1.VersionDocument;
 
 /**
  * Verify XML parsing is OK
  * 
  * @author Rong.Chen
  */
+@SuppressWarnings("SpellCheckingInspection")
 public class XMLParsingTest extends TestCase {
 	
 	public void testParseItemTree() throws Exception {
-		ItemsDocument xobj = ItemsDocument.Factory.parse(fromClasspath("item_tree.xml"));
-		Object obj = xobj.getItems();
+		ItemsDocument document = ItemsDocument.Factory.parse(fromClasspath("item_tree.xml"));
+		Object obj = document.getItems();
 		assertTrue("expected ITEM_TREE, but got: " + obj.getClass(), 
 				obj instanceof ITEMTREE);
 		ITEMTREE tree = (ITEMTREE) obj;
@@ -37,14 +47,14 @@ public class XMLParsingTest extends TestCase {
 		ELEMENT element = (ELEMENT) tree.getItemsArray(0);
 		assertEquals("element.name wrong", "Blood glucose", 
 				element.getName().getValue());
-		
+
 		DVQUANTITY quantity = (DVQUANTITY) element.getValue();
 		assertEquals("quantity.magnitude wrong", 100.0, quantity.getMagnitude());
 	}
 	
 	public void testParseItemTree2() throws Exception {
-		ItemsDocument xobj = ItemsDocument.Factory.parse(fromClasspath("item_tree_002.xml"));
-		Object obj = xobj.getItems();
+		ItemsDocument document = ItemsDocument.Factory.parse(fromClasspath("item_tree_002.xml"));
+		Object obj = document.getItems();
 		assertTrue("expected ITEM_TREE, but got: " + obj.getClass(), 
 				obj instanceof ITEMTREE);
 		ITEMTREE tree = (ITEMTREE) obj;
@@ -68,14 +78,7 @@ public class XMLParsingTest extends TestCase {
 				comp.getContext().getStartTime().getValue());
 		
 		OBSERVATION obs = (OBSERVATION) ((SECTION)comp.getContentArray(0)).getItemsArray()[0];
-		
-		//assertTrue(((SECTION) comp.getContentArray(0)).getItemsArray()).getData()
-		//		.getEventsArray(0)).getData() instanceof OBSERVATION);
-		
-		//assertTrue("observation.data.events[0].items[0]",
-		//		(((OBSERVATION)((SECTION) comp.getContentArray(0))).getItemsArray()).getData()
-		//		.getEventsArray(0).getData() instanceof ITEMTREE);
-		
+
 		ITEMTREE itemTree = (ITEMTREE) obs.getData().getEventsArray(0).getData();
 		ELEMENT element = (ELEMENT) itemTree.getItemsArray(0);
 		
@@ -84,14 +87,14 @@ public class XMLParsingTest extends TestCase {
 	}
 
 	public void testParseOriginalVersion() throws Exception {
-		VERSION xobj = VersionDocument.Factory.parse(fromClasspath(
+		VERSION document = VersionDocument.Factory.parse(fromClasspath(
 				"original_version_001.xml")).getVersion();
 		
-		assertTrue("expected originial_version, but got: " + xobj.getClass(),
-				xobj instanceof ORIGINALVERSION);
+		assertTrue("expected original_version, but got: " + document.getClass(),
+				document instanceof ORIGINALVERSION);
 		
 		
-		ORIGINALVERSION orgVer = (ORIGINALVERSION) xobj;
+		ORIGINALVERSION orgVer = (ORIGINALVERSION) document;
 		
 		assertEquals("originalVersion.uid wrong", 
 				"c7ff23f4-6ad2-4ff9-bedf-fb60be37666e::10aec661-5458-4ff6-8e63-c2265537196d::1",
@@ -107,10 +110,10 @@ public class XMLParsingTest extends TestCase {
 				item instanceof SECTION);
 		
 		SECTION section = (SECTION) item;
-		OBSERVATION obser = (OBSERVATION) section.getItemsArray()[0];
+		OBSERVATION observation = (OBSERVATION) section.getItemsArray()[0];
 		
 		assertEquals("openEHR-EHR-OBSERVATION.laboratory-lipids.v1",
-				obser.getArchetypeNodeId());
+				observation.getArchetypeNodeId());
 	}
 	
 	private InputStream fromClasspath(String filename) throws Exception {

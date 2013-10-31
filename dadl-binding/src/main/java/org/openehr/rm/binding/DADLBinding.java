@@ -5,6 +5,7 @@
  *
  * author:      "Rong Chen <rong.acode@gmail.com>"
  * copyright:   "Copyright (c) 2008 Cambio Healthcare Systems, Sweden"
+ * copyright:   "Copyright (c) 2013 MEDvision360"
  * license:     "See notice at bottom of class"
  *
  * file:        "$URL$"
@@ -13,21 +14,15 @@
  */
 package org.openehr.rm.binding;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.openehr.am.parser.AttributeValue;
 import org.openehr.am.parser.ComplexObjectBlock;
 import org.openehr.am.parser.ContentObject;
@@ -41,11 +36,9 @@ import org.openehr.build.RMObjectBuilder;
 import org.openehr.build.RMObjectBuildingException;
 import org.openehr.build.SystemValue;
 import org.openehr.rm.Attribute;
-import org.openehr.rm.FullConstructor;
 import org.openehr.rm.RMObject;
 import org.openehr.rm.datatypes.quantity.ProportionKind;
 import org.openehr.rm.datatypes.text.CodePhrase;
-import org.openehr.rm.support.basic.Interval;
 import org.openehr.rm.support.measurement.MeasurementService;
 import org.openehr.rm.support.measurement.SimpleMeasurementService;
 import org.openehr.rm.support.terminology.TerminologyService;
@@ -62,26 +55,20 @@ public class DADLBinding {
 		init(values);
 	}
 
-	public DADLBinding() throws DADLBindingException {
-		try {
-			TerminologyService termServ;
-			MeasurementService measureServ;
-			termServ = SimpleTerminologyService.getInstance();
-			measureServ = SimpleMeasurementService.getInstance();
+	public DADLBinding() {
+		TerminologyService terminologyService = SimpleTerminologyService.getInstance();
+		MeasurementService measurementService = SimpleMeasurementService.getInstance();
 
-			CodePhrase lang = new CodePhrase("ISO_639-1", "en");
-			CodePhrase charset = new CodePhrase("IANA_character-sets", "UTF-8");
+		CodePhrase lang = new CodePhrase("ISO_639-1", "en");
+		CodePhrase charset = new CodePhrase("IANA_character-sets", "UTF-8");
 
-			Map<SystemValue, Object> values = new HashMap<SystemValue, Object>();
-			values.put(SystemValue.LANGUAGE, lang);
-			values.put(SystemValue.CHARSET, charset);
-			values.put(SystemValue.ENCODING, charset);
-			values.put(SystemValue.TERMINOLOGY_SERVICE, termServ);
-			values.put(SystemValue.MEASUREMENT_SERVICE, measureServ);
-			init(values);
-		} catch (Exception e) {
-			throw new DADLBindingException("failed to start DADLBinding:" + e.getMessage(), e);
-		}
+		Map<SystemValue, Object> values = new HashMap<SystemValue, Object>();
+		values.put(SystemValue.LANGUAGE, lang);
+		values.put(SystemValue.CHARSET, charset);
+		values.put(SystemValue.ENCODING, charset);
+		values.put(SystemValue.TERMINOLOGY_SERVICE, terminologyService);
+		values.put(SystemValue.MEASUREMENT_SERVICE, measurementService);
+		init(values);
 	}
 
 	private void init(Map<SystemValue, Object> values) {
@@ -91,9 +78,7 @@ public class DADLBinding {
 	public Object bind(ContentObject co) throws DADLBindingException,
 			RMObjectBuildingException {
 		if (co.getAttributeValues() != null) {
-
 			return bindAttributes(null, co.getAttributeValues());
-
 		} else {
 			ComplexObjectBlock complexObj = co.getComplexObjectBlock();
 			return bindComplexBlock(complexObj);
@@ -102,7 +87,6 @@ public class DADLBinding {
 
 	RMObject bindAttributes(String type, List<AttributeValue> attributes)
 			throws DADLBindingException, RMObjectBuildingException {
-
 		Map<String, Object> values = new HashMap<String, Object>();
 		for (AttributeValue attr : attributes) {
 			String id = attr.getId();
@@ -114,13 +98,8 @@ public class DADLBinding {
 	
 	RMObject invokeRMObjectBuilder(String type, Map<String, Object> valueMap)
 			throws DADLBindingException, RMObjectBuildingException {
-		
 		if(type == null) {
 			type = builder.findMatchingRMClass(valueMap);
-			if(type == null) {
-				throw new DADLBindingException("failed untyped binding with - "
-					+ valueMap); 
-			}
 		}
 		RMObject rmObj = builder.construct(type, valueMap);
 		return rmObj;
@@ -141,13 +120,13 @@ public class DADLBinding {
 			return block.getSimpleValue().getValue();
 		} else if (block.getSimpleListValue() != null) {
 			List<SimpleValue> values = block.getSimpleListValue();
-			List list = new ArrayList(values.size());
+			List<Object> list = new ArrayList<Object>(values.size());
 			for (SimpleValue sv : values) {
 				list.add(sv.getValue());
 			}
 			return list;
 		} else if (block.getSimpleIntervalValue() != null) {
-			Interval<Comparable> values = block.getSimpleIntervalValue();
+			//Interval<Comparable> values = block.getSimpleIntervalValue();
 			// TODO
 			return null;
 		} else if (block.getTermCode() != null) {
@@ -157,35 +136,27 @@ public class DADLBinding {
 		} else {
 			throw new DADLBindingException("empty block");
 		}
-
 	}
 
 	Object bindComplexBlock(ComplexObjectBlock block)
 			throws DADLBindingException, RMObjectBuildingException {
-		
 		if (block instanceof SingleAttributeObjectBlock) {
 			SingleAttributeObjectBlock singleBlock = 
-				(SingleAttributeObjectBlock) block;
-			
+					(SingleAttributeObjectBlock) block;
 			// a special case to deal with empty attribute list
 			if("LIST".equalsIgnoreCase(singleBlock.getTypeIdentifier())
 					&& singleBlock.getAttributeValues().isEmpty()) {
-				
 				return new ArrayList();
 			} 
-
 			return bindAttributes(singleBlock.getTypeIdentifier(), singleBlock
 					.getAttributeValues());
-
 		} else {
 			MultipleAttributeObjectBlock multiBlock = 
-				(MultipleAttributeObjectBlock) block;
-			String type = multiBlock.getTypeIdentifier();
+					(MultipleAttributeObjectBlock) block;
 			List<KeyedObject> list = multiBlock.getKeyObjects();
 			// TODO assume list?
 			List<Object> valueList = new ArrayList<Object>();
 			for(KeyedObject ko : list) {
-				Object key = ko.getKey().getValue();
 				Object value = bindObjectBlock(ko.getObject());
 				valueList.add(value);
 			}
@@ -198,19 +169,14 @@ public class DADLBinding {
 		return toDADL(obj, 1, lines);
 	}
 	
+	@SuppressWarnings("ConstantConditions")
 	public List<String> toDADL(Object obj, int indent, List<String> lines)
 			throws InvocationTargetException, IllegalAccessException {		
-		
-		
-		log.debug("toDADL on obj.getClass: " + obj.getClass().getCanonicalName()
-				+ ", indent: " + indent + ", line.size: "  + lines.size());
-		
 		Class klass = obj.getClass();		
-		
 		String className = klass.getSimpleName();
-		String rmName = toUnderscoreSeparated(className).toUpperCase();
-	
+		String rmName = builder.toRmEntityName(className).toUpperCase();
 		String typeHeader = "(" + rmName + ") <";
+
 		int size = lines.size();
 		if(size == 0) {
 			lines.add(typeHeader); 
@@ -220,10 +186,10 @@ public class DADLBinding {
 			lines.set(size -1, l);
 		}	
 		
-		SortedMap<String, Attribute> attributes = attributeMap(obj.getClass());
-		String name = null;
-		Object value = null;
-		StringBuffer buf = null;
+		SortedMap<String, Attribute> attributes = builder.getAttributes(obj.getClass());
+		String name;
+		Object value;
+		StringBuffer buf;
 		for(Iterator<String> names = attributes.keySet().iterator(); names.hasNext();) {	
 			name = names.next();
 			
@@ -236,7 +202,7 @@ public class DADLBinding {
 				continue; // causing dead-loops
 			}
 			
-			Method getter = getter(name, obj.getClass());
+			Method getter = builder.getter(name, obj.getClass());
 			if(getter != null) { 
 				value = getter.invoke(obj, null);
 				buf = new StringBuffer();
@@ -244,19 +210,13 @@ public class DADLBinding {
 					for(int i = 0; i < indent; i++) {
 						buf.append("\t");
 					}
-					buf.append(toUnderscoreSeparated(name));
+					buf.append(builder.toAttributeName(name));
 					buf.append(" = ");
 					
-					if(isOpenEHRRMClass(value) && !(value instanceof ProportionKind)) {
-					
+					if(builder.isOpenEHRRMClass(value) && !(value instanceof ProportionKind)) {
 						lines.add(buf.toString());
-						
-						log.debug("fetching attribute: " + name);
-						
 						toDADL(value, indent + 1, lines);						
-				
 					} else if(value instanceof List) {
-						
 						buf.append("<");
 						lines.add(buf.toString());
 						
@@ -276,9 +236,7 @@ public class DADLBinding {
 						}
 						buf.append(">");
 						lines.add(buf.toString());
-						
 					} else {
-						
 						buf.append("<");
 						if(value instanceof String || value instanceof Boolean) {							
 							buf.append("\"");
@@ -290,7 +248,6 @@ public class DADLBinding {
 						buf.append(">");
 						lines.add(buf.toString());
 					}
-					
 				}
 			}
 		}
@@ -303,90 +260,7 @@ public class DADLBinding {
 		return lines;
 	}
 	
-	private Method getter(String attributeName, Class klass) {
-		Method[] methods = klass.getMethods();
-		String name = "get" + attributeName.substring(0, 1).toUpperCase() +
-						attributeName.substring(1);
-
-		log.debug("search getter method of name '" + name + "'");
-
-		for(Method method : methods) {
-			if(method.getName().equals(name)) {
-				Type[] paras = method.getParameterTypes();
-				if(paras.length == 0) {
-					return method;
-				}
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Return a map with name as the key and index of position as the value for
-	 * all parameters of the full constructor in the RMObject
-	 * 
-	 * @param rmClass
-	 * @return
-	 */
-	private SortedMap<String, Attribute> attributeMap(Class rmClass) {
-		SortedMap<String, Attribute> map = new TreeMap<String, Attribute>();
-		Constructor constructor = fullConstructor(rmClass);
-		
-		if(constructor == null) {
-			throw new IllegalArgumentException("Unknown RM Class: " + 
-					rmClass.getClass().getCanonicalName());
-		}
-		
-		Annotation[][] annotations = constructor.getParameterAnnotations();
-
-		for (int i = 0; i < annotations.length; i++) {
-			if (annotations[i].length == 0) {
-				throw new IllegalArgumentException(
-						"missing annotation at position " + i);
-			}
-			Attribute attribute = (Attribute) annotations[i][0];
-			map.put(attribute.name(), attribute);
-		}
-		return map;
-	}
-
-	private static Constructor fullConstructor(Class klass) {
-		if(klass == null) {
-			return null;
-		}
-		Constructor[] array = klass.getConstructors();
-		for (Constructor constructor : array) {
-			if (constructor.isAnnotationPresent(FullConstructor.class)) {
-				return constructor;
-			}
-		}
-		return null;
-	}	
-	
-	public String toUnderscoreSeparated(String camelCase) {
-		String[] array = StringUtils.splitByCharacterTypeCamelCase(camelCase);
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < array.length; i++) {
-			String s = array[i];
-			buf.append(s.substring(0, 1).toLowerCase());
-			buf.append(s.substring(1));
-			if (i != array.length - 1) {
-				buf.append("_");
-			}
-		}
-		return buf.toString();
-	}
-
-	private boolean isOpenEHRRMClass(Object obj) {
-		return obj.getClass().getName().contains(OPENEHR_RM_PACKAGE);
-	}
-	
-
 	private RMObjectBuilder builder;
-	private static Logger log = Logger.getLogger(DADLBinding.class);
-	private static final String OPENEHR_RM_PACKAGE = "org.openehr.rm.";
-	private static final String LINE_RETURN = "\r\n";
-
 }
 /*
  * ***** BEGIN LICENSE BLOCK ***** Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -405,7 +279,7 @@ public class DADLBinding {
  * the Initial Developer are Copyright (C) 2003-2008 the Initial Developer. All
  * Rights Reserved.
  * 
- * Contributor(s):
+ * Contributor(s): Leo Simons
  * 
  * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for

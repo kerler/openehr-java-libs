@@ -14,11 +14,15 @@
  */
 package org.openehr.build;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import junit.framework.TestCase;
 import org.openehr.rm.common.generic.PartyIdentified;
+import org.openehr.rm.common.generic.PartySelf;
 import org.openehr.rm.datastructure.itemstructure.ItemList;
-import org.openehr.rm.support.identification.*;
-import org.openehr.rm.support.measurement.*;
 import org.openehr.rm.datastructure.itemstructure.ItemSingle;
 import org.openehr.rm.datastructure.itemstructure.representation.Cluster;
 import org.openehr.rm.datastructure.itemstructure.representation.Element;
@@ -26,13 +30,13 @@ import org.openehr.rm.datastructure.itemstructure.representation.Item;
 import org.openehr.rm.datatypes.quantity.DvInterval;
 import org.openehr.rm.datatypes.quantity.datetime.DvDateTime;
 import org.openehr.rm.datatypes.text.CodePhrase;
-import org.openehr.rm.datatypes.text.DvCodedText;
 import org.openehr.rm.datatypes.text.DvText;
+import org.openehr.rm.support.identification.HierObjectID;
+import org.openehr.rm.support.identification.PartyRef;
+import org.openehr.rm.support.measurement.MeasurementService;
+import org.openehr.rm.support.measurement.SimpleMeasurementService;
 import org.openehr.rm.support.terminology.TerminologyService;
-import org.openehr.rm.common.generic.PartySelf;
 import org.openehr.terminology.SimpleTerminologyService;
-
-import java.util.*;
 
 /**
  * Base class for all RM object building test providing common test fixture
@@ -152,12 +156,6 @@ public class BuildTestBase extends TestCase {
 
 	protected DvText text(String value) throws Exception {
 		return new DvText(value, lang, charset, ts);
-	}
-
-	protected DvCodedText codedText(String value, String code) throws Exception {
-		CodePhrase codePhrase = new CodePhrase(TerminologyService.OPENEHR, code);
-
-		return new DvCodedText(value, lang, charset, codePhrase, ts);
 	}
 
 	/* field */

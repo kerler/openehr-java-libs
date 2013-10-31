@@ -1,11 +1,23 @@
 package org.openehr.binding;
 
-import java.io.File;
 import java.lang.reflect.Method;
 
-import org.apache.commons.io.FileUtils;
-import org.openehr.schemas.v1.*;
+import org.openehr.schemas.v1.ARCHETYPED;
+import org.openehr.schemas.v1.ARCHETYPEID;
+import org.openehr.schemas.v1.CODEPHRASE;
+import org.openehr.schemas.v1.DVDATETIME;
+import org.openehr.schemas.v1.DVQUANTITY;
+import org.openehr.schemas.v1.DVTEXT;
+import org.openehr.schemas.v1.ELEMENT;
+import org.openehr.schemas.v1.HISTORY;
+import org.openehr.schemas.v1.ITEMTREE;
+import org.openehr.schemas.v1.OBSERVATION;
+import org.openehr.schemas.v1.PARTYSELF;
+import org.openehr.schemas.v1.POINTEVENT;
+import org.openehr.schemas.v1.TEMPLATEID;
+import org.openehr.schemas.v1.TERMINOLOGYID;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class CreateXMLObjectTest extends XMLBindingTestBase {
 	
 	public void testCreateDVTEXT() throws Exception {
@@ -34,7 +46,7 @@ public class CreateXMLObjectTest extends XMLBindingTestBase {
 		
 		assertNotNull(tree.getItemsArray(0));
 		assertEquals("element", 
-				((ELEMENT) tree.getItemsArray(0)).getName().getValue());
+				tree.getItemsArray(0).getName().getValue());
 	}
 	
 	public void testCreatePointEvent() throws Exception {
@@ -59,16 +71,16 @@ public class CreateXMLObjectTest extends XMLBindingTestBase {
 	}
 	
 	public void testCreateInstanceWithReflection() throws Exception {
-		Class klass = Class.forName("org.openehr.schemas.v1.DVTEXT");
-		Class factoryClass = klass.getClasses()[0];
+		Class<?> klass = Class.forName("org.openehr.schemas.v1.DVTEXT");
+		Class<?> factoryClass = klass.getClasses()[0];
 		Method factoryMethod = factoryClass.getMethod("newInstance", null);
 		Object obj = factoryMethod.invoke(null, null);
 		assertTrue(obj instanceof DVTEXT);
 	}
 	
 	public void testCallSetterWithReflection() throws Exception {
-		Class klass = Class.forName("org.openehr.schemas.v1.DVTEXT");
-		Class factoryClass = klass.getClasses()[0];
+		Class<?> klass = Class.forName("org.openehr.schemas.v1.DVTEXT");
+		Class<?> factoryClass = klass.getClasses()[0];
 		Method factoryMethod = factoryClass.getMethod("newInstance", null);
 		Object obj = factoryMethod.invoke(null, null);
 		Method setterMethod = klass.getMethod("setValue", String.class);
@@ -135,7 +147,7 @@ public class CreateXMLObjectTest extends XMLBindingTestBase {
 	private ITEMTREE itemTree() {
 		ITEMTREE tree = ITEMTREE.Factory.newInstance();
 		tree.setName(dvText("data"));
-		ELEMENT element = null;
+		ELEMENT element;
 		
 		element = element("Total Cholesterol", 6.1, "mmol/l");
 		tree.insertNewItems(0);

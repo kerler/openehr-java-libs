@@ -18,8 +18,6 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.*;
 
-import org.apache.log4j.Logger;
-
 import openEHR.v1.template.ACTION;
 import openEHR.v1.template.ADMINENTRY;
 import openEHR.v1.template.Archetyped;
@@ -114,10 +112,6 @@ public class Flattener {
 		// no need to copy templateMap
 		this.templateMap = templateMap;
 		
-		log.debug("Loaded archetype/template maps, total archetypes: " + 
-				archetypeMap.size() + ", total templates: " + 
-				(templateMap == null ? 0 : templateMap.size()));		
-		
 		return toFlattenedArchetype(template);
 	}
 	
@@ -127,31 +121,27 @@ public class Flattener {
 	private Archetype toFlattenedArchetype(TEMPLATE template) 
 			throws FlatteningException {
 		
-		log.debug("Flattening template.. STARTED");
-		
+				
 		Archetyped definition = template.getDefinition();		
 		
 		// start flattening
 		Archetype flattended = flattenArchetyped(definition);		
 		flattended.reloadNodeMaps();
 		
-		log.debug("Flattening template DONE");
-		
+				
 		return flattended;
 	}
 	
 	/**
 	 * Flattening entry point for root class archetyped
 	 * 
-	 * @param parentArchetype provides the context of flattening, null for first
 	 * entry of the recursive function	   
 	 * @param definition
 	 * @throws FlatteningException
 	 */
 	private Archetype flattenArchetyped(Archetyped definition) throws FlatteningException {
 		
-		log.debug("flattening archetyped on archetype: " + definition.getArchetypeId());
-		
+				
 		// TODO handle template_id
 		
 		
@@ -183,10 +173,7 @@ public class Flattener {
 	private Archetype flattenItem(Archetype parentArchetype, ITEM item) 
 		throws FlatteningException {
 		
-		log.debug("flattening item on parentArchetype " + 
-				parentArchetype.getArchetypeId() + " at path " + 
-				item.getPath());
-		
+				
 		Archetype archetype = retrieveArchetype(item.getArchetypeId());
 		
 		applyTemplateConstraints(archetype, item);
@@ -199,8 +186,7 @@ public class Flattener {
 	
 	private Archetype flattenComposition(COMPOSITION composition) throws FlatteningException {
 		
-		log.debug("flattening composition on archetype: " + composition.getArchetypeId());
-		
+				
 		Archetype archetype = retrieveArchetype(composition.getArchetypeId());
 		CComplexObject root = archetype.getDefinition();
 		CAttribute contentAttribute = root.getAttribute(CONTENT);		
@@ -221,15 +207,13 @@ public class Flattener {
 			
 			for(ContentItem item : items) {
 				
-				log.debug("flattening composition.content..");
-				
+								
 				flattenContentItem(archetype, item);								
 			}
 		}		
 		
 		// TODO handle "/context" attribute	
-		// log.warn("flattening composition.context..not implemented");
-		
+		// 		
 		applyRules(archetype, composition.getRuleArray());
 		applyNameConstraint(archetype, archetype.getDefinition(), 
 				composition.getName(), "/");
@@ -240,9 +224,7 @@ public class Flattener {
 	private Archetype flattenContentItem(Archetype parentArchetype, 
 			ContentItem definition)	throws FlatteningException {
 		
-		log.debug("flattening content_item on archetype: " + 
-				definition.getArchetypeId() + " on path: " + definition.getPath());
-		
+				
 		Archetype archetype = null;
 		String templateId = definition.getTemplateId();
 		
@@ -280,8 +262,7 @@ public class Flattener {
 	private void applyTemplateConstraints(Archetype archetype, 
 			Archetyped definition) throws FlatteningException {
 		
-		log.debug("applying common template constraints.. ");
-		
+				
 		if(archetype == null) {
 			return;
 		}
@@ -324,8 +305,7 @@ public class Flattener {
 			annotation = item.getAnnotation();			
 		
 		} else {
-			log.warn("unsupported definition type: " + definition);
-		}
+					}
 		
 		applyNameConstraint(archetype, archetype.getDefinition(), name , "/");
 		
@@ -343,8 +323,7 @@ public class Flattener {
 		
 		// TODO shouldn't happen
 		if(cobj == null) {
-			log.warn("null cobj encountered at setPathPrefix(): " + prefix);
-			return;
+						return;
 		}
 		
 		String path = cobj.path();
@@ -371,8 +350,7 @@ public class Flattener {
 					// TODO
 					if(child == null) {
 						it.remove();
-						log.warn("null child encountered remove in setPathPrefix()..");
-					}
+											}
 					setPathPrefixOnCObjectTree(child, prefix);					
 				}
 			}
@@ -384,17 +362,14 @@ public class Flattener {
 
 		// TODO shouldn't happen
 		if (cobj == null) {
-			log.warn("null cobj in updatePathWithNamedNodeOnCObjectTree(): " 
-					+ nodeId + "/" + name);
-			return;
+						return;
 		}
 		
 		String path = cobj.path();		
 		path = replaceNodeIdWithNamedNode(path, nodeId, name);
 		cobj.setPath(path);
 		
-		//log.debug("cobj.path: " + cobj.path());
-		
+		//		
 		if (cobj instanceof CComplexObject) {
 			CComplexObject ccobj = (CComplexObject) cobj;
 		
@@ -404,8 +379,7 @@ public class Flattener {
 				path = replaceNodeIdWithNamedNode(path, nodeId, name);				
 				cattr.setPath(path);
 				
-				//log.debug("cattr.path: " + cattr.path());
-				
+				//				
 				for (Iterator<CObject> it = cattr.getChildren().iterator(); it
 						.hasNext();) {
 
@@ -413,8 +387,7 @@ public class Flattener {
 					// TODO
 					if (child == null) {
 						it.remove();
-						log.warn("null child encountered remove in setPathPrefix()..");
-					}
+											}
 					updatePathWithNamedNodeOnCObjectTree(child, nodeId, name);
 				}
 			}
@@ -434,9 +407,7 @@ public class Flattener {
 	private Archetype flattenSection(Archetype parentArchetype, 
 			Archetype archetype, SECTION section) throws FlatteningException {
 		
-		log.debug("flattening section on archetype " + section.getArchetypeId() 
-				+ " at path " + section.getPath());
-		
+				
 		ContentItem[] items = section.getItemArray();
 		String path = section.getPath();		
 		CComplexObject root = archetype.getDefinition();
@@ -468,8 +439,7 @@ public class Flattener {
 			// flatten each item in the list
 			for(ContentItem item : items) {
 				
-				log.debug("flattening section.items.. ");
-				
+								
 				flattenContentItem(archetype, item);					
 			}	
 		}		
@@ -506,8 +476,8 @@ public class Flattener {
 	 * Overwrite recursively all the nodeIds in the given cobj tree with 
 	 * incremental number starting with given count value
 	 * 
-	 * @param ccobj
-	 * @param diff
+	 * @param cobj
+	 * @param count
 	 * @return total number of nodeIds adjusted, used to update nodeId counter
 	 */
 	protected long adjustNodeIds(CObject cobj, long count) 
@@ -542,16 +512,13 @@ public class Flattener {
 		if(i >= 0) {
 			attr = attr.substring(0, i);
 		}
-		log.debug("attribute name: " + attr);
-		return attr;
+				return attr;
 	}
 	
 	private Archetype flattenEntry(Archetype parentArchetype, 
 			Archetype archetype, ENTRY definition) throws FlatteningException {
 		
-		log.debug("flattening entry on archetype: "	+ definition.getArchetypeId()
-				+ ", path: " + ((ENTRY) definition).getPath());
-				
+						
 		String path = definition.getPath();
 				
 		// bind current archetype to the parent 
@@ -624,8 +591,7 @@ public class Flattener {
 				int i = path.indexOf("]");
 				path = path.substring(0, hybridStart) + path.substring(i);
 				
-				log.debug("hybrid path detected, converted physical path: " + path);
-			}			
+							}			
 			
 			CAttribute attribute = getParentAttribute(parentArchetype, path);			
 			if(attribute == null) {			
@@ -666,9 +632,7 @@ public class Flattener {
 			Archetype archetype, INSTRUCTION instruction) 
 			throws FlatteningException {
 		
-		log.debug("flattening instruction on archetype: "	+ instruction.getArchetypeId()
-				+ ", path: " + ((ENTRY) instruction).getPath());
-		
+				
 		ITEMSTRUCTURE[] descriptions = instruction.getActivityDescriptionArray();		
 		
 		if(descriptions != null) {					
@@ -688,8 +652,6 @@ public class Flattener {
 			CObject cobj = it.next();
 			if(cobj instanceof ArchetypeSlot) {
 				it.remove();
-				log.debug("archetype_slot removed from attribute " + 
-						cattr.getRmAttributeName());			
 			}
 		}	
 	}
@@ -705,9 +667,7 @@ public class Flattener {
 	private Archetype flattenItemStructure(Archetype parentArchetype,
 			ITEMSTRUCTURE structure) throws FlatteningException {		
 		
-		log.debug("flattening item_structure on archetype: " +
-				structure.getArchetypeId()	+ " on path: " + structure.getPath());
-		
+				
 		Archetype archetype = retrieveArchetype(structure.getArchetypeId());
 		
 		applyTemplateConstraints(archetype, structure);
@@ -753,9 +713,7 @@ public class Flattener {
 					
 					// more than one named node for the same path,
 					// thus no need to rewrite the paths
-					log.debug("more than one named node [" + name + 
-							"] on path: " + leadingPath );
-					
+										
 					name = null;					
 					break;
 				}
@@ -774,8 +732,7 @@ public class Flattener {
 				
 				rule.setPath(path);
 				
-				log.debug("rewrote path with named node: " + path);
-			}
+							}
 			applyRule(archetype, rule);
 		}
 	}
@@ -790,9 +747,7 @@ public class Flattener {
 	void applyRule(Archetype archetype, Statement rule) 
 			throws FlatteningException {
 		
-		log.debug("apply rule [" + rule + "] on archetype: " + 
-				archetype.getArchetypeId().toString());
-		
+				
 		String path = rule.getPath();
 		
 		ArchetypeConstraint constraint = archetype.node(rule.getPath());
@@ -818,8 +773,7 @@ public class Flattener {
 		archetype.updatePathNodeMap((CObject) constraint);
 		
 		if(constraint instanceof CObject) {
-			log.debug("newly set Occurrences: " + ((CObject) constraint).getOccurrences() );
-		}	
+					}	
 		
 	}	
 	
@@ -846,7 +800,7 @@ public class Flattener {
 	 *   <Rule path="/items[at0001]" default="SNOMED-CT::258835005::mg/dygn" />	 * 
 	 * 
 	 * @param constraint
-	 * @param rule
+	 * @param defaultValue
 	 * @throws FlatteningException if rmType doesn't fit
 	 */
 	protected void applyDefaultValueConstraint(ArchetypeConstraint constraint,
@@ -856,8 +810,7 @@ public class Flattener {
 			return;
 		}
 		
-		log.debug("applying default value on path: " + constraint.path());
-		
+				
 		if( ! (constraint instanceof CComplexObject)) {
 			
 			throw new FlatteningException("failed to apply default constraint," +
@@ -927,8 +880,7 @@ public class Flattener {
 			CPrimitiveObject cpo = CPrimitiveObject.createSingleRequired(path, cstring);
 			valueAttr.addChild(cpo);
 			
-			log.debug("c_string applied on path: " + constraint.path());
-		
+					
 		} else {
 			// or coded_text value
 			String path = ccobj.path() + "/" + VALUE; 
@@ -938,8 +890,7 @@ public class Flattener {
 					null, null, codePhrase, null);
 			cattr.addChild(ccp);
 			
-			log.debug("c_code_phrase constraint applied on path: " + constraint.path());
-		}
+					}
 	}
 	
 	protected void applyOccurrencesConstraints(Archetype archetype,
@@ -959,9 +910,7 @@ public class Flattener {
 	protected void applyOccurrencesConstraint(Archetype archetype,
 			CObject cobj, BigInteger max, BigInteger min) throws FlatteningException {
 		
-		log.debug("applyOccurrencesConstraint, min: " + min + ", max: " + max 
-				+ ", at: " + cobj.path());
-		
+				
 		if( !cobj.isRoot() ) {
 			//assert(cobj.getParent() != null);
 		}
@@ -975,8 +924,6 @@ public class Flattener {
 		// can be overriden
 		if(( !"/".equals(path)) && occurrences == null) { 
 			
-			log.warn("try to set occurrences constraint on default(null)" +
-					" occurrences: " + cobj.path());			
 			return;			
 		}
 		
@@ -1007,9 +954,7 @@ public class Flattener {
 		if(( !"/".equals(path)) && occurrences.getUpper() != null && occurrences.getLower() != null
 				&& occurrences.getUpper().intValue() == 1 
 				&& occurrences.getLower().intValue() == 1) {
-			log.warn("try to set occurrences constraint on required node: " 
-					+ cobj.path());
-			return;
+						return;
 		}		
 		
 		// TODO temp fix for missing min=0 when setting
@@ -1042,8 +987,7 @@ public class Flattener {
 			new Interval<Integer>(lower, upper, lower != null, upper != null);
 		
 		
-		log.debug("newOccurrences: " + newOccurrences);
-		
+				
 		if(newOccurrences.getLower() != null 
 				&& newOccurrences.getLower().intValue() > 0
 				&& !"/".equals(path)) {			
@@ -1053,16 +997,13 @@ public class Flattener {
 			if(parent instanceof CMultipleAttribute) {
 				CMultipleAttribute cma = (CMultipleAttribute) parent;
 				
-				log.debug("setting parent.cardinality: " + cma.getCardinality());
-				
+								
 				// TODO temporarily switched off
 				cma.getCardinality().getInterval().setLower(newOccurrences.getLower());
 				
-				log.debug("AFTER parent.cardinality: " + cma.getCardinality());
-			} else {
+							} else {
 				if(parent == null) {
-					log.debug("parent null at " + cobj.path());
-				}
+									}
 			}
 		}		
 		cobj.setOccurrences(newOccurrences);
@@ -1075,9 +1016,7 @@ public class Flattener {
 			ArchetypeConstraint constraint, String name, String localPath) 
 			throws FlatteningException {
 		
-		log.debug("applying name constraint [" + name + "] on path: " + 
-				localPath + "constraint: " + constraint.path());
-		
+				
 		// preconditions
 		assert(constraint instanceof CComplexObject);
 		
@@ -1103,15 +1042,13 @@ public class Flattener {
 				ccobj.setParent(parent);
 				checkSiblingNodeIdAndName(parent, ccobj.getNodeId(), name);
 				
-				log.debug("sibling node with same node_id added, " + name);
-			}	
+							}	
 	    }	
 		
 		// TODO check physicalPath needed
 		path = ccobj.path();
 		
-		log.debug("applyNameConstraint - middle ccobj.path: " + ccobj.path());
-		
+				
 		// perhaps unnecessary
 		CAttribute nameAttr = ccobj.getAttribute(NAME);
 		CPrimitiveObject cpo = null;
@@ -1139,8 +1076,7 @@ public class Flattener {
 		updatePathWithNamedNodeOnCObjectTree(ccobj, ccobj.getNodeId(), name);
 		archetype.updatePathNodeMapRecursively(ccobj);		
 		
-		log.debug("after setting name, cobj.path: " + ccobj.path());
-		
+				
 		return ccobj;
 	}
 	
@@ -1165,8 +1101,7 @@ public class Flattener {
 					// seems unnecessary
 					// archetype.reloadNodeMaps();
 					
-					log.debug("Unnamed sibling node[" + nodeId + "] removed..");
-					
+										
 					break;
 				}
 			}
@@ -1216,8 +1151,7 @@ public class Flattener {
 			return;
 		}
 		
-		log.debug("applying value constraint on path: " + constraint.path());
-		
+				
 		if( ! (constraint instanceof CComplexObject)) {
 			throw new FlatteningException("Unexpected constraint type: " + 
 					(constraint == null ? "null" : constraint.getClass()));
@@ -1251,8 +1185,7 @@ public class Flattener {
 	protected void applyQuantityConstraint(CComplexObject ccobj, 
 			QuantityConstraint qc) throws FlatteningException {
 		
-		log.debug("applying quantity constraint on path: " + ccobj.path());
-		
+				
 		String[] includedUnits = qc.getIncludedUnitsArray();
 		String[] excludedUnits = qc.getExcludedUnitsArray();
 		QuantityUnitConstraint[] magnitudeUnits = qc.getUnitMagnitudeArray() ;
@@ -1262,8 +1195,7 @@ public class Flattener {
 		
 		if(magnitudeUnits != null && magnitudeUnits.length == 1) {
 			
-			log.debug("setting unit_magnitude quantity constraint");
-			
+						
 			QuantityUnitConstraint quc = magnitudeUnits[0];
 			Interval<Double> magnitude = new Interval<Double>(
 					quc.getMinMagnitude(), quc.getMaxMagnitude(), 
@@ -1281,14 +1213,12 @@ public class Flattener {
 	        //     <includedUnits>mmol/L</includedUnits>
 	        // </constraint>
 			
-			log.debug("setting included_units quantity constraint");
-			
+						
 			item = new CDvQuantityItem(includedUnits[0]);
 				
 		} else if(excludedUnits != null && excludedUnits.length > 0) {
 			
-			log.debug("setting excluded_units quantity constraint");
-			
+						
 			// <constraint xsi:type="quantityConstraint">
 	        //     <excludedUnits>in</excludedUnits>
 	        // </constraint>
@@ -1357,8 +1287,7 @@ public class Flattener {
 	protected void applyTextConstraint(CComplexObject ccobj, 
 			TextConstraint tc) throws FlatteningException {
 		
-		log.debug("applying text constraint on path: " + ccobj.path());
-		
+				
 		String[] includedValues = tc.getIncludedValuesArray();
 		String[] excludedValues = tc.getExcludedValuesArray();
 		
@@ -1427,8 +1356,7 @@ public class Flattener {
 						CCodePhrase ccp = 
 							(CCodePhrase) definingCodeAttr.getChildren().get(0);
 						
-						log.debug("before codeList.size: " + ccp.getCodeList().size());
-						
+												
 						for(Iterator<String> it = ccp.getCodeList().iterator(); 
 								it.hasNext();) {
 							String code = it.next();
@@ -1439,8 +1367,7 @@ public class Flattener {
 								}
 							}
 						}
-						log.debug("after codeList.size: " + ccp.getCodeList().size());
-						
+												
 					} else {
 						// TODO other data types?
 					}
@@ -1459,8 +1386,7 @@ public class Flattener {
 	protected void applyMultipleConstraint(CComplexObject ccobj, 
 			MultipleConstraint mc) throws FlatteningException {
 		
-		log.debug("applying multiple constraint on path: " + ccobj.path());
-		
+				
 		String[] includedTypes = mc.getIncludedTypesArray();
 		CAttribute cattr = ccobj.getAttribute(VALUE);
 		
@@ -1485,8 +1411,7 @@ public class Flattener {
 			for(CObject child : newChildrenList) {
 				cattr.addChild(child);
 			}
-			log.debug("total " + newChildrenList.size() + " children left");
-			
+						
 		} else {			
 			// in case value attribute doesn't exist in archetype
 			String valuePath = 	ccobj.path() + "/" + VALUE;
@@ -1502,9 +1427,7 @@ public class Flattener {
 					CComplexObject.createSingleRequired(valuePath, rmType);
 				cattr.addChild(child);
 			}
-			log.debug("value attribute added with total " 
-					+ cattr.getChildren().size() + "child(s)");
-		}		
+					}		
 	}
 	
 	/*
@@ -1696,8 +1619,6 @@ public class Flattener {
 		format.setMinimumIntegerDigits(4);
 		format.setMaximumIntegerDigits(8);
 	}
-	
-	private static Logger log = Logger.getLogger(Flattener.class);
 	
 	/* fields */
 	private Map<String, Archetype> archetypeMap;

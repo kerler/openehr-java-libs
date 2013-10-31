@@ -6,6 +6,7 @@ import org.openehr.rm.datatypes.quantity.DvProportion;
 import org.openehr.rm.datatypes.quantity.ProportionKind;
 import org.openehr.schemas.v1.DVPROPORTION;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class BindDataTypesTest extends XMLBindingTestBase {
 	
 	public void testBindDvProportionToXML() throws Exception {
@@ -16,14 +17,9 @@ public class BindDataTypesTest extends XMLBindingTestBase {
 	}	
 	
 	public void testBindXMLDvProportionToRM() throws Exception {
-		DVPROPORTION xobj = DVPROPORTION.Factory.parse(
+		DVPROPORTION prop = DVPROPORTION.Factory.parse(
 				fromClasspath("dv_proportion.xml"));
 		
-		assertTrue("expected dv_proportion, but got: " 
-				+ (xobj == null ? null : xobj.getClass()),
-				xobj instanceof DVPROPORTION);
-		
-		DVPROPORTION prop = (DVPROPORTION) xobj;		
 		assertEquals("unexpected proportion.numerator", 0.5f, 
 				prop.getNumerator());
 		assertEquals("unexpected proportion.denominator", 1.0f, 

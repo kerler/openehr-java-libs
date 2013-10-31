@@ -25,7 +25,7 @@ public class CreateDvMultimediaTest extends BuildTestBase {
 		DvURI uri = new DvURI("www.iana.org");
         byte[] data = new byte[0];
         TerminologyService terminologyService = SimpleTerminologyService.getInstance();
-		DvMultimedia dm = new DvMultimedia(charset, language, alternateText,
+		new DvMultimedia(charset, language, alternateText,
 				mediaType, compressionAlgorithm, integrityCheck, 
 				integrityCheckAlgorithm, thumbnail, uri, data, terminologyService);
 		

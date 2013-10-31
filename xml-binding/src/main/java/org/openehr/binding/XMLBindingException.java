@@ -13,12 +13,21 @@
  */
 package org.openehr.binding;
 
+@SuppressWarnings("UnusedDeclaration")
 public class XMLBindingException extends Exception {
 	public XMLBindingException() {		
 	}
 	
 	public XMLBindingException(String msg) {
 		super(msg);
+	}
+
+	public XMLBindingException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public XMLBindingException(Throwable cause) {
+		super(cause);
 	}
 }
 /*

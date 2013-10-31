@@ -16,7 +16,6 @@ package org.openehr.rm.util;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.openehr.rm.composition.Composition;
 import org.openehr.rm.composition.content.ContentItem;
 import org.openehr.rm.composition.content.entry.Action;
@@ -60,8 +59,6 @@ public class RMUtil {
 	 */
 	public static void purge(Composition composition) {
 		
-		log.debug("Composition.purge() started..");		
-		
 		List<ContentItem> items = composition.getContent();
 		
 		for(Iterator<ContentItem> it = items.iterator(); it.hasNext();) {
@@ -69,8 +66,6 @@ public class RMUtil {
 			if(isEmpty(item)) {
 			
 				it.remove();
-				
-				log.debug("item of class " + item.getClass() + ", removed..");
 			
 			} else if(item instanceof Section) {
 				
@@ -78,8 +73,6 @@ public class RMUtil {
 				purge(section);				
 			}
 		}
-		
-		log.debug("Composition.purge() finished..");
 	}
 	
 	
@@ -91,8 +84,6 @@ public class RMUtil {
 	 */
 	public static void purge(Section section) {
 	
-		log.debug("Section.purge() started.. ");
-		
 		List<ContentItem> items = section.getItems(); 
 		
 		for(Iterator<ContentItem> it = items.iterator(); it.hasNext();) {
@@ -102,16 +93,12 @@ public class RMUtil {
 			
 				it.remove();
 			
-				log.debug("item of class " + item.getClass() + ", removed..");
-			
 			} else if(item instanceof Section) {
 				
 				Section subsection = (Section) item;
 				purge(subsection);				
 			}
 		}
-		
-		log.debug("Section.purge() finished.. ");
 	}
 	
 	private static boolean isEmpty(Section section) {
@@ -206,8 +193,6 @@ public class RMUtil {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
-	private static final Logger log = Logger.getLogger(RMUtil.class);
 }
 /*
  * ***** BEGIN LICENSE BLOCK ***** Version: MPL 1.1/GPL 2.0/LGPL 2.1
