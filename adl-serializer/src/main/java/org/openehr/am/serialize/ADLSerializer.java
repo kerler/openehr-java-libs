@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.apache.commons.lang.StringUtils;
 import org.openehr.am.archetype.Archetype;
@@ -251,7 +252,7 @@ public class ADLSerializer {
 				if(td.getAccreditation() != null) {
 					indent(3, out);
 					out.write("accreditation = <\"");	
-					out.write(td.getAccreditation());
+					out.write(string_value(td.getAccreditation()));
 					out.write("\">");
 					newline(out);
 				}
@@ -286,7 +287,7 @@ public class ADLSerializer {
 			out.write("[\"");
 			out.write(key);
 			out.write("\"] = <\"");
-			out.write(map.get(key));
+			out.write(string_value(map.get(key)));
 			out.write("\">");			
 			newline(out);
 		}
@@ -308,7 +309,7 @@ public class ADLSerializer {
 		Map<String, String> map = description.getOriginalAuthor();
 		for (String key : map.keySet()) {
 			indent(2, out);
-			out.write("[\"" + key + "\"] = <\"" + map.get(key) + "\">");
+			out.write("[\"" + key + "\"] = <\"" + string_value(map.get(key)) + "\">");
 			newline(out);
 		}
 		indent(1, out);
@@ -375,7 +376,7 @@ public class ADLSerializer {
 		indent(indent, out);
 		out.write(label);
 		out.write(" = <\"");
-		out.write(value);
+		out.write(string_value(value));
 		out.write("\">");
 		newline(out);
 	}
@@ -391,7 +392,7 @@ public class ADLSerializer {
 		out.write(" = <");
 		for (int i = 0, j = list.size(); i < j; i++) {
 			out.write("\"");
-			out.write(list.get(i));
+			out.write(string_value(list.get(i)));
 			out.write("\"");
 			if (i != j - 1) {
 				out.write(",");
@@ -414,7 +415,7 @@ public class ADLSerializer {
 
 		for (String key : map.keySet()) {
 			indent(2, out);
-			out.write("[\"" + key + "\"] = <\"" + map.get(key) + "\">");
+			out.write("[\"" + key + "\"] = <\"" + string_value(map.get(key)) + "\">");
 			newline(out);
 		}
 
@@ -1034,7 +1035,7 @@ public class ADLSerializer {
 					indent(5, out);
 					out.write(entry.getKey());
 					out.write(" = <\"");
-					out.write(entry.getValue());
+					out.write(string_value(entry.getValue()));
 					out.write("\">");
 					newline(out);
 				}
@@ -1185,12 +1186,12 @@ public class ADLSerializer {
 			printList(cstring.getList(), out, true);
 		} else if(cstring.defaultValue() != null) {
 			out.write("\"");
-			out.write(cstring.defaultValue());
+			out.write(string_value(cstring.defaultValue()));
 			out.write("\"");
 		}
 		if(cstring.hasAssumedValue()) {
 			out.write("; ");
-			out.write("\"" + cstring.assumedValue() + "\"");
+			out.write("\"" + string_value(cstring.assumedValue()) + "\"");
 		}
 	}
 
@@ -1206,10 +1207,10 @@ public class ADLSerializer {
 			}
 			if (string) {
 				out.write("\"");
-			}
-			out.write(list.get(i).toString());
-			if (string) {
+				out.write(string_value(list.get(i).toString()));
 				out.write("\"");
+			} else {
+				out.write(list.get(i).toString());
 			}
 		}
 	}
@@ -1252,6 +1253,20 @@ public class ADLSerializer {
 			out.write(indent);
 		}
 	}
+	
+	private String string_value(Object value) {
+		if (value == null) {
+			return null;
+        }
+		String newValue = String.valueOf(value)
+                // replace \ with \\
+                //    the first escape is for java to pass \\ to the regex engine
+                //    the second escape is for the regex engine to handle its char escape
+                .replaceAll("\\\\", Matcher.quoteReplacement("\\\\"))
+                // replace " with \"
+                .replaceAll("\"", Matcher.quoteReplacement("\\\""));
+        return newValue;
+	}
 
 	/* charset encodings */
 	public static final Charset UTF8 = Charset.forName("UTF-8");
@@ -1280,7 +1295,7 @@ public class ADLSerializer {
  * Rights Reserved.
  * 
  * Contributor(s): Mattias Forss, Johan Hjalmarsson, Erik Sundvall, 
- *                 Sebastian Garde
+ *                 Sebastian Garde, Leo Simons
  * 
  * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for

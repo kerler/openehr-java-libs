@@ -1,0 +1,21 @@
+ontology
+    term_definitions = <
+        ["en"] = <
+            items = <
+                ["at0001"] = <
+                    text = <"text with \"quoted content\" for at0001">
+                    description = <"desc with a literal backslash \\ at0001">
+                >
+            >
+        >
+    >
+    constraint_definitions = <
+        ["en"] = <
+            items = <
+                ["ac0001"] = <
+                    text = <"text with \"quoted content\" ac0001">
+                    description = <"desc with a literal backslash \\ ac0001">
+                >
+            >
+        >
+    >
