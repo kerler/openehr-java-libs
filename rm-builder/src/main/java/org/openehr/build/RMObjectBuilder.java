@@ -387,6 +387,9 @@ public class RMObjectBuilder {
 	public Map<String, Class<?>> retrieveAttribute(String rmClassName)
 			throws RMObjectBuildingException {
 		Class<?> rmClass = retrieveRMType(rmClassName);
+		if (Modifier.isAbstract(rmClass.getModifiers())) {
+			throw new RMObjectBuildingException(String.format("RM type abstract: %s", rmClassName));
+		}
 		Map<String, Class<?>> map = getAttributeTypes(rmClass);
 		return map;
 	}
