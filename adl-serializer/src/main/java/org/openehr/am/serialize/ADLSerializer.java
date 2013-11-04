@@ -323,6 +323,8 @@ public class ADLSerializer {
 		newline(out);
 
 		printNonEmptyString("resource_package_uri", description.getResourcePackageUri(), 1, out);
+		printNonEmptyStringList("other_contributors", description.getOtherContributors(), 1, out);
+		printNonEmptyStringMap("other_details", description.getOtherDetails(), 1, out);
 		
 		indent(1, out);
 		out.write("details = <");
