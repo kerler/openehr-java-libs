@@ -60,12 +60,9 @@ public final class Cluster extends Item {
         super(uid, archetypeNodeId, name, archetypeDetails, feederAudit,
                 links, parent);
 
-	if (items != null && items.isEmpty()) { //Skip items==null check to facilitate item skeleton generation
-            throw new IllegalArgumentException("null or empty items");
+	    if (items != null && !items.isEmpty()){
+            this.items = new ArrayList<Item>(items);
         }
-	if (items!=null){
-        this.items = new ArrayList<Item>(items);
-    }
     }
 
     /**

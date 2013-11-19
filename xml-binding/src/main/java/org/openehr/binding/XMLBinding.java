@@ -18,7 +18,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -150,7 +153,7 @@ public class XMLBinding {
 						continue;
 					}
 
-					boolean isList = false;
+					boolean isCollection = false;
 
 					if (attributeValue.getClass().isArray()) {
 						Object[] array = (Object[]) attributeValue;
@@ -168,18 +171,19 @@ public class XMLBinding {
 						attributeValue = BigInteger.valueOf(kind.getValue());
 					} else if (builder.isOpenEHRRMClass(attributeValue)) {
 						attributeValue = bindToXML(attributeValue);
-					} else if (List.class.isAssignableFrom(
+					} else if (Collection.class.isAssignableFrom(
 							attributeValue.getClass())) {
-						isList = true;
-						List list = (List) attributeValue;
+						isCollection = true;
+                        Collection<?> collection = (Collection<?>) attributeValue;
 
 						String attributeName = getAttributeNameFromGetter(name);
-						setterMethod = findSetter(attributeName, xmlClass, isList);
+						setterMethod = findSetter(attributeName, xmlClass, isCollection);
 
 						Method addNew = findAddNew(attributeName, xmlClass);
 
-						for (int i = 0, j = list.size() - 1; i <= j; i++) {
-							Object value = list.get(i);
+                        Iterator<?> it = collection.iterator();
+						for (int i = 0; it.hasNext(); i++) {
+							Object value = it.next();
 							Object[] array = new Object[2];
 							addNew.invoke(xmlObj, null);
 							array[0] = new Integer(i);
@@ -188,7 +192,7 @@ public class XMLBinding {
 						}
 					}
 
-					if (!isList) {
+					if (!isCollection) {
 						String attributeName = getAttributeNameFromGetter(name);
 
 						if ("nullFlavor".equals(attributeName)) {
@@ -200,7 +204,7 @@ public class XMLBinding {
 							continue;
 						}
 
-						setterMethod = findSetter(attributeName, xmlClass, isList);
+						setterMethod = findSetter(attributeName, xmlClass, isCollection);
 						if (setterMethod == null) {
 							continue;
 						}
@@ -283,19 +287,19 @@ public class XMLBinding {
 		return rmObj;
 	}
 
-	protected Method findSetter(String attributeName, Class<?> xmlClass, boolean isList) {
+	protected Method findSetter(String attributeName, Class<?> xmlClass, boolean isCollection) {
 		Method[] methods = xmlClass.getMethods();
 		String name = "set" + attributeName.substring(0, 1).toUpperCase() +
 				attributeName.substring(1);
 
-		if (isList) {
+		if (isCollection) {
 			name += "Array";
 		}
 
 		for (Method method : methods) {
 			if (method.getName().equals(name)) {
 				Type[] paras = method.getParameterTypes();
-				if (isList) {
+				if (isCollection) {
 					if (paras.length == 2) {
 						return method;
 					}
