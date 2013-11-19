@@ -21,12 +21,27 @@ package org.openehr.build;
  * @version 1.0
  */
 
+@SuppressWarnings("UnusedDeclaration")
 public class AttributeMissingException extends RMObjectBuildingException {
 
     public AttributeMissingException(String msg) {
         super(msg, ErrorType.MISSING);
     }
 
+    public AttributeMissingException(String message, Throwable cause, ErrorType errorType)
+    {
+        super(message, cause, errorType);
+    }
+
+    public AttributeMissingException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public AttributeMissingException(String msg, ErrorType errorType)
+    {
+        super(msg, errorType);
+    }
 }
 
 

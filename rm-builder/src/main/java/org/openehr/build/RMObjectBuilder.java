@@ -22,6 +22,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -345,11 +346,11 @@ public class RMObjectBuilder {
 			if (e instanceof AttributeFormatException) {
 				throw new AttributeFormatException(String.format(
 						"failed to create new instance of %s: %s, valueMap: %s",
-						rmClassName, e.getMessage(), toString(valueMap), e));
+						rmClassName, e.getMessage(), toString(valueMap), e), e);
 			} else if (e instanceof AttributeMissingException) {
 				throw new AttributeMissingException(String.format(
 						"failed to create new instance of %s: %s, valueMap: %s",
-						rmClassName, e.getMessage(), toString(valueMap), e));
+						rmClassName, e.getMessage(), toString(valueMap), e), e);
 			}
 
 			if (stringParsingTypes.contains(rmClassName)) {
@@ -368,7 +369,7 @@ public class RMObjectBuilder {
 
 			throw new RMObjectBuildingException(String.format(
 					"failed to create new instance of %s: %s: %s, valueMap: %s",
-					rmClassName, e.getClass().getSimpleName(), e.getMessage(), toString(valueMap), e));
+					rmClassName, e.getClass().getSimpleName(), e.getMessage(), toString(valueMap), e), e);
 		}
 	}
 
@@ -602,17 +603,19 @@ public class RMObjectBuilder {
 				Class<? extends Enum> enumType = (Class<? extends Enum>) parameterType;
 				value = Enum.valueOf(enumType, value.toString());
 			}
-		} else if (value instanceof String) {
-			value = convertPrimitive(parameterType, value);
+        } else if (CharSequence.class.isAssignableFrom(parameterType)) {
+      	    value = String.valueOf(value);
 		} else if (value.getClass().isArray()) {
-			if (parameterType.isAssignableFrom(List.class)) {
-				value = toList(value);
-			} else if (parameterType.isAssignableFrom(Set.class)) {
-				value = toSet(value);
+			if (Set.class.isAssignableFrom(parameterType)) {
+                value = toSet(value);
+			} else if (Collection.class.isAssignableFrom(parameterType)) {
+                value = toList(value);
 			}
 		} else if (!parameterType.isPrimitive()) {
 			tryCast(parameterType, value);
-		}
+		} else {
+            value = convertPrimitive(parameterType, value);
+        }
 
 		return value;
 	}
@@ -633,8 +636,7 @@ public class RMObjectBuilder {
 		for (Object o : array) {
 			set.add(o);
 		}
-		value = set;
-		return value;
+		return set;
 	}
 
 	private Object toList(Object value) {
@@ -643,34 +645,49 @@ public class RMObjectBuilder {
 		for (Object o : array) {
 			list.add(o);
 		}
-		value = list;
-		return value;
+		return list;
 	}
 
 	private Object convertPrimitive(Class<?> type, Object value)
 			throws AttributeFormatException {
-		String str = (String) value;
-		try {
+        try {
 			if (type.equals(int.class) || type.equals(Integer.class)) {
-				value = Integer.parseInt(str);
+                if (!(value instanceof Integer)) {
+                    value = Integer.parseInt(String.valueOf(value));
+                }
 			} else if (type.equals(short.class) || type.equals(Short.class)) {
-				value = Short.parseShort(str);
+                if (!(value instanceof Short)) {
+                    value = Short.parseShort(String.valueOf(value));
+                }
 			} else if (type.equals(long.class) || type.equals(Long.class)) {
-				value = Long.parseLong(str);
+                if (!(value instanceof Long)) {
+                    value = Long.parseLong(String.valueOf(value));
+                }
 			} else if (type.equals(double.class) || type.equals(Double.class)) {
-				value = Double.parseDouble(str);
+                if (!(value instanceof Double)) {
+                    value = Double.parseDouble(String.valueOf(value));
+                }
 			} else if (type.equals(float.class) || type.equals(Float.class)) {
-				value = Float.parseFloat(str);
+                if (!(value instanceof Float)) {
+                    value = Float.parseFloat(String.valueOf(value));
+                }
 			} else if (type.equals(byte[].class) || type.equals(Byte[].class)) {
-				value = str.getBytes();
+                if (!(value instanceof Byte)) {
+                    value = String.valueOf(value).getBytes();
+                }
 			} else if (type.equals(boolean.class) || type.equals(Boolean.class)) {
-				value = Boolean.parseBoolean(str);
+                if (!(value instanceof Boolean)) {
+                    value = Boolean.parseBoolean(String.valueOf(value));
+                }
 			} else if (type.equals(char.class) || type.equals(Character.class)) {
-				if (str.length() > 0) {
-					value = str.charAt(0);
-				} else {
-					throw new AttributeFormatException(String.format("wrong format, expect %s", type));
-				}
+                if (!(value instanceof Character)) {
+                    String str = String.valueOf(value);
+    				if (str.length() > 0) {
+    					value = str.charAt(0);
+    				} else {
+    					throw new AttributeFormatException(String.format("wrong format, expect %s", type));
+    				}
+                }
 			}
 		} catch (NumberFormatException e) {
 			throw new AttributeFormatException(String.format("wrong format expect %s: %s",
