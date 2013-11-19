@@ -41,9 +41,16 @@ public class PartyRef extends ObjectRef {
 	@FullConstructor
     public PartyRef(
     		@Attribute(name = "id", required = true)ObjectID id, 
+			@Attribute(name = "namespace", required = true)String namespace, 
     		@Attribute(name = "type", required = true)String type) {
-        super(id, "DEMOGRAPHIC", type);        
-    }    
+        super(id, namespace, type);
+    }
+
+    public PartyRef(
+    		@Attribute(name = "id", required = true)ObjectID id, 
+    		@Attribute(name = "type", required = true)String type) {
+        this(id, "DEMOGRAPHIC", type);
+    }
 }
 
 /*

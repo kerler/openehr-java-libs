@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- openEHR Release 1.0.2 Composition  XML schema -->
+<!-- Authored by MEDvision360 2013.11.18  -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.openehr.org/v1"
+	targetNamespace="http://schemas.openehr.org/v1" elementFormDefault="qualified" version="v1.0.2"
+	id="Ehr.xsd">
+	<xs:include schemaLocation="Content.xsd"/>
+  
+  <xs:element name="ehr" type="EHR"/>
+  <xs:complexType name="EHR">
+    <xs:sequence>
+      <xs:element name="systemID" type="HIER_OBJECT_ID"/>
+      <xs:element name="ehrID" type="HIER_OBJECT_ID"/>
+      <xs:element name="timeCreated" type="DV_DATE_TIME"/>
+      <xs:element name="contributions" type="OBJECT_REF" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="ehrStatus" type="OBJECT_REF"/>
+      <xs:element name="directory" type="OBJECT_REF" minOccurs="0"/>
+      <xs:element name="compositions" type="OBJECT_REF" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:element name="ehrStatus" type="EHR_STATUS"/>
+ 	<xs:complexType name="EHR_STATUS">
+ 		<xs:complexContent>
+ 			<xs:extension base="LOCATABLE">
+         <xs:sequence>
+           <xs:element name="subject" type="PARTY_SELF" minOccurs="0"/>
+           <xs:element name="isModifiable" type="xs:boolean"/>
+           <xs:element name="isQueryable" type="xs:boolean"/>
+           <xs:element name="otherDetails" type="ITEM_STRUCTURE" minOccurs="0"/>
+         </xs:sequence>
+ 			</xs:extension>
+ 		</xs:complexContent>
+	</xs:complexType>
+  
+  <xs:element name="ehrAccess" type="EHR_ACCESS"/>
+  <xs:complexType name="EHR_ACCESS">
+    <xs:complexContent>
+      <xs:extension base="LOCATABLE">
+        <xs:sequence>
+          <xs:element name="settings" type="ACCESS_CONTROL_SETTINGS" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="ACCESS_CONTROL_SETTINGS">
+    <xs:sequence/>
+  </xs:complexType>
+  
+</xs:schema>

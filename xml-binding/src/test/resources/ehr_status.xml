@@ -1,0 +1,20 @@
+<ehrStatus
+    xmlns="http://schemas.openehr.org/v1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    archetype_node_id="at0001">
+  <name>
+    <value>EHR Status</value>
+  </name>
+  <uid xsi:type="HIER_OBJECT_ID">
+    <value>5c37ae32-df44-4cde-baa9-50e3adb5418a</value>
+  </uid>
+  <archetype_details>
+    <archetype_id>
+      <value>openEHR-EHR-EHRSTATUS.unittest_ehrstatus.v1</value>
+    </archetype_id>
+    <rm_version>1.0.2</rm_version>
+  </archetype_details>
+  <subject xsi:type="PARTY_SELF"/>
+  <isModifiable>true</isModifiable>
+  <isQueryable>true</isQueryable>
+</ehrStatus>

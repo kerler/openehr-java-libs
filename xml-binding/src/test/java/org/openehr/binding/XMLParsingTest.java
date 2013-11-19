@@ -116,6 +116,13 @@ public class XMLParsingTest extends TestCase {
 				observation.getArchetypeNodeId());
 	}
 	
+    public void testParseCompositionWithDvMultimediaWithoutSize() throws Exception {
+   		CompositionDocument compDoc = CompositionDocument.Factory.parse(
+   				fromClasspath("composition-generated.xml"));	
+   
+   		assertNotNull("compositionDocument null", compDoc);
+    }
+    
 	private InputStream fromClasspath(String filename) throws Exception {
     	return this.getClass().getClassLoader().getResourceAsStream(
     			filename);

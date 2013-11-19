@@ -106,6 +106,8 @@ import org.openehr.rm.demographic.PartyIdentity;
 import org.openehr.rm.demographic.PartyRelationship;
 import org.openehr.rm.demographic.Person;
 import org.openehr.rm.demographic.Role;
+import org.openehr.rm.ehr.EHR;
+import org.openehr.rm.ehr.EHRAccess;
 import org.openehr.rm.ehr.EHRStatus;
 import org.openehr.rm.support.identification.AccessGroupRef;
 import org.openehr.rm.support.identification.ArchetypeID;
@@ -184,7 +186,8 @@ public class RMObjectBuilder {
 				Action.class,          Activity.class,        Evaluation.class,      ISMTransition.class,
 				Instruction.class,     InstructionDetails.class, Observation.class,  AdminEntry.class,
 				Section.class,         Composition.class,     EventContext.class,    EHRStatus.class,
-
+				EHR.class, EHRAccess.class,
+				
 				// demographic classes
 				Address.class,         PartyIdentity.class,   Agent.class,           Group.class,
 				Organisation.class,    Person.class,          Contact.class,         PartyRelationship.class, 

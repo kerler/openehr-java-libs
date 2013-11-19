@@ -1,0 +1,20 @@
+<ehr
+    xmlns="http://schemas.openehr.org/v1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemID xsi:type="HIER_OBJECT_ID">
+    <value>BBB5FFDE-9734-410D-846B-F1D9E7F78B77</value>
+  </systemID>
+  <ehrID xsi:type="HIER_OBJECT_ID">
+    <value>F4CFFDDC-A69F-4A48-83FB-269C075ED2B8</value>
+  </ehrID>
+  <timeCreated>
+    <value>2013-11-26T12:04:03Z</value>
+  </timeCreated>
+  <ehrStatus>
+    <id xsi:type="HIER_OBJECT_ID">
+      <value>838A0C5F-B55D-4BDD-B382-8003E542E413</value>
+    </id>
+    <namespace>EHR</namespace>
+    <type>PERSON</type>
+  </ehrStatus>
+</ehr>

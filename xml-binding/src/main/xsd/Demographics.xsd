@@ -24,7 +24,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	<xs:element name="ROLE" type="ROLE"/>	
+	<xs:element name="role" type="ROLE"/>	
 	<xs:complexType name="ROLE">
 		<xs:complexContent>
 			<xs:extension base="PARTY">
@@ -49,28 +49,31 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	<xs:element name="AGENT" type="AGENT"/>	
+	<xs:element name="agent" type="AGENT"/>	
 	<xs:complexType name="AGENT">
 		<xs:complexContent>
 			<xs:extension base="ACTOR">
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
-	<xs:element name="ORGANISATION" type="ORGANISATION"/>	
+  
+	<xs:element name="organisation" type="ORGANISATION"/>	
 	<xs:complexType name="ORGANISATION">
 		<xs:complexContent>
 			<xs:extension base="ACTOR">
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
-	<xs:element name="GROUP" type="GROUP"/>	
+  
+	<xs:element name="group" type="GROUP"/>	
 	<xs:complexType name="GROUP">
 		<xs:complexContent>
 			<xs:extension base="ACTOR">
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
-	<xs:element name="PERSON" type="PERSON"/>	
+  
+	<xs:element name="person" type="PERSON"/>	
 	<xs:complexType name="PERSON">
 		<xs:complexContent>
 			<xs:extension base="ACTOR">
@@ -78,7 +81,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	<xs:element name="PARTY_RELATIONSHIP" type="PARTY_RELATIONSHIP"/>	
+	<xs:element name="partyRelationship" type="PARTY_RELATIONSHIP"/>	
 	<xs:complexType name="PARTY_RELATIONSHIP">
 		<xs:complexContent>
 			<xs:extension base="LOCATABLE">
@@ -94,8 +97,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	
-	<xs:element name="CONTACT" type="CONTACT"/>	
+	<xs:element name="contact" type="CONTACT"/>	
 	<xs:complexType name="CONTACT">
 		<xs:complexContent>
 			<xs:extension base="LOCATABLE">
@@ -108,7 +110,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	<xs:element name="ADDRESS" type="ADDRESS"/>	
+	<xs:element name="address" type="ADDRESS"/>	
 	<xs:complexType name="ADDRESS">
 		<xs:complexContent>
 			<xs:extension base="LOCATABLE">
@@ -121,7 +123,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:element name="PARTY_IDENTITY" type="PARTY_IDENTITY"/>	
+	<xs:element name="partyIdentity" type="PARTY_IDENTITY"/>	
 	<xs:complexType name="PARTY_IDENTITY">
 		<xs:complexContent>
 			<xs:extension base="LOCATABLE">
@@ -134,7 +136,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	<xs:element name="CAPABILITY" type="CAPABILITY"/>	
+	<xs:element name="capability" type="CAPABILITY"/>	
 	<xs:complexType name="CAPABILITY">
 		<xs:complexContent>
 			<xs:extension base="LOCATABLE">

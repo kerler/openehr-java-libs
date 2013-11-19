@@ -19,6 +19,7 @@ import java.util.Set;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openehr.rm.Attribute;
+import org.openehr.rm.FullConstructor;
 import org.openehr.rm.common.archetyped.Archetyped;
 import org.openehr.rm.common.archetyped.FeederAudit;
 import org.openehr.rm.common.archetyped.Link;
@@ -38,7 +39,7 @@ import org.openehr.rm.support.identification.UIDBasedID;
 public class EHRAccess extends Locatable {
     
     /** Creates a new instance of EHRAccess */
-    public EHRAccess(
+    @FullConstructor public EHRAccess(
             @Attribute(name = "uid") UIDBasedID uid,
             @Attribute(name = "archetypeNodeId", required = true) String archetypeNodeId,
             @Attribute(name = "name", required = true) DvText name,

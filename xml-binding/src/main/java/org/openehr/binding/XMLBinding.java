@@ -75,6 +75,11 @@ public class XMLBinding {
 			return null;
 		}
 		String className = obj.getClass().getSimpleName();
+		String xmlClassName = className;
+		if ("EHRStatus".equalsIgnoreCase(className)) {
+			// deal with case-sensitively challenged class name
+			xmlClassName = "EhrStatus";
+		}
 		Method[] methods = obj.getClass().getMethods();
 
 		try {
@@ -87,13 +92,13 @@ public class XMLBinding {
 				Class<?> factoryClass;
 				try {
 					factoryClass = Class.forName(XML_BINDING_PACKAGE +
-							className + "Document$Factory");
+							xmlClassName + "Document$Factory");
 				} catch (ClassNotFoundException e) {
 					factoryClass = Class.forName(XML_BINDING_PACKAGE +
-							className.toUpperCase() + "Document$Factory");
+							xmlClassName.toUpperCase() + "Document$Factory");
 				} catch (NoClassDefFoundError e) {
 					factoryClass = Class.forName(XML_BINDING_PACKAGE +
-							className.toUpperCase() + "Document$Factory");
+							xmlClassName.toUpperCase() + "Document$Factory");
 				}
 
 				Method factoryMethod = factoryClass.getMethod(NEW_INSTANCE, XmlOptions.class);
@@ -115,7 +120,7 @@ public class XMLBinding {
 				}
 			} else {
 				xmlClass = Class.forName(XML_BINDING_PACKAGE +
-						className.toUpperCase());
+						xmlClassName.toUpperCase());
 
 				Class<?> factoryClass = xmlClass.getClasses()[0];
 				Method factoryMethod = factoryClass.getMethod(NEW_INSTANCE, XmlOptions.class);
