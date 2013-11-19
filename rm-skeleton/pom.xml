@@ -40,6 +40,7 @@
 			<groupId>openehr</groupId>
 			<artifactId>oet-parser</artifactId>
 			<version>${project.version}</version>
+      <scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>openehr</groupId>
@@ -83,7 +84,7 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.4</version>
-			<scope>test</scope>
+			<!--<scope>test</scope>-->
 		</dependency>
 	</dependencies>
 </project>

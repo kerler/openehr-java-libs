@@ -46,7 +46,6 @@ import org.openehr.am.openehrprofile.datatypes.quantity.CDvQuantity;
 import org.openehr.am.openehrprofile.datatypes.quantity.CDvQuantityItem;
 import org.openehr.am.openehrprofile.datatypes.quantity.Ordinal;
 import org.openehr.am.openehrprofile.datatypes.text.CCodePhrase;
-import org.openehr.am.template.TermMap;
 import org.openehr.build.RMObjectBuilder;
 import org.openehr.build.SystemValue;
 import org.openehr.rm.common.archetyped.Archetyped;

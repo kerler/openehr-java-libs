@@ -31,7 +31,6 @@ import org.openehr.rm.datastructure.history.History;
 import org.openehr.rm.datastructure.itemstructure.ItemList;
 import org.openehr.rm.datastructure.itemstructure.ItemStructure;
 import org.openehr.rm.datastructure.itemstructure.ItemTree;
-import org.openehr.schemas.v1.ACTIVITY;
 
 /**
  * Support class that provide various utility functions
