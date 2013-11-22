@@ -2,9 +2,9 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	<groupId>openehr</groupId>
+	<groupId>com.medvision360.openehr</groupId>
 		<artifactId>ref_impl_java</artifactId>
-		<version>1.0.5-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 	<artifactId>oet-parser</artifactId>
 	<packaging>jar</packaging>
@@ -49,22 +49,22 @@
 	
 	<dependencies>		
 		<dependency>
-			<groupId>openehr</groupId>
+			<groupId>com.medvision360.openehr</groupId>
 			<artifactId>openehr-rm-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>openehr</groupId>
+			<groupId>com.medvision360.openehr</groupId>
 			<artifactId>openehr-rm-domain</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-            <groupId>openehr</groupId>
+            <groupId>com.medvision360.openehr</groupId>
             <artifactId>openehr-aom</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>openehr</groupId>
+            <groupId>com.medvision360.openehr</groupId>
             <artifactId>adl-parser</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -79,12 +79,12 @@
 		    <version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>openehr</groupId>
+			<groupId>com.medvision360.openehr</groupId>
 			<artifactId>measure-serv</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>openehr</groupId>
+			<groupId>com.medvision360.openehr</groupId>
 			<artifactId>mini-termserv</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -101,7 +101,7 @@
 		    <scope>test</scope>
 		</dependency>		
 		<dependency>
-            <groupId>openehr</groupId>
+            <groupId>com.medvision360.openehr</groupId>
             <artifactId>adl-serializer</artifactId>
             <version>${project.version}</version>
         </dependency>
