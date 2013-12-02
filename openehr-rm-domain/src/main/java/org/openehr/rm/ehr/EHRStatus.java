@@ -40,7 +40,7 @@ import org.openehr.rm.support.identification.UIDBasedID;
 public class EHRStatus extends Locatable {
 
     @FullConstructor public EHRStatus(
-            @Attribute(name = "uid", required = true) UIDBasedID uid,
+            @Attribute(name = "uid") UIDBasedID uid,
             @Attribute(name = "archetypeNodeId", required = true) String archetypeNodeId,
             @Attribute(name = "name", required = true) DvText name,
             @Attribute(name = "archetypeDetails", required = true) Archetyped archetypeDetails,
