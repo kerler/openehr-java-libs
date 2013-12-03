@@ -61,7 +61,7 @@ public class PartyRelationship extends Locatable {
      */
     @FullConstructor
             public PartyRelationship(
-            @Attribute(name = "uid", required = true) UIDBasedID uid,
+            @Attribute(name = "uid") UIDBasedID uid,
             @Attribute(name = "archetypeNodeId", required = true) String archetypeNodeId,
             @Attribute(name = "name", required = true) DvText name,
             @Attribute(name = "archetypeDetails") Archetyped archetypeDetails,
@@ -75,9 +75,9 @@ public class PartyRelationship extends Locatable {
 
         super(uid, archetypeNodeId, name, archetypeDetails, feederAudit, links, parent);
 
-        if (uid == null) {
-            throw new IllegalArgumentException("null uid");
-        }
+        // if (uid == null) {
+        //     throw new IllegalArgumentException("null uid");
+        // }
 
         //todo:  source.relationships.has(Current)
         //todo:  not target.reverserelationships.has(Current)

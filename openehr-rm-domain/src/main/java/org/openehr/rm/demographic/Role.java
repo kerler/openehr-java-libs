@@ -71,7 +71,7 @@ public class Role extends Party {
      *                                  or performer is null
      */
     @FullConstructor
-            public Role(@Attribute(name = "uid", required = true) UIDBasedID uid,
+            public Role(@Attribute(name = "uid") UIDBasedID uid,
                         @Attribute(name = "archetypeNodeId", required = true) String archetypeNodeId,
                         @Attribute(name = "name", required = true) DvText name,
                         @Attribute(name = "archetypeDetails", required = true) Archetyped archetypeDetails,

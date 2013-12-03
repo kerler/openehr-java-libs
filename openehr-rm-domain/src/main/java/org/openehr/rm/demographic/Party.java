@@ -71,9 +71,9 @@ public abstract class Party extends Locatable {
                     ItemStructure details) {
         super(uid, archetypeNodeId, name, archetypeDetails, feederAudit, links, null);
 
-        if (uid == null) {
-            throw new IllegalArgumentException("null uid");
-        }
+        // if (uid == null) {
+        //     throw new IllegalArgumentException("null uid");
+        // }
         // if (identities == null || identities.isEmpty()) {
         //     throw new IllegalArgumentException("null or empty identities");
         // }
